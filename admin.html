@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Admin - BMS BANK</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="shortcut icon" href="assets/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Force dark mode for admin */
+        body.admin-mode {
+            background: #0f172a !important;
+        }
+        body.admin-mode .header {
+            background: linear-gradient(135deg, #020617 0%, #0f172a 100%) !important;
+        }
+        body.admin-mode .admin-container {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .stat-card {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .form-group input,
+        body.admin-mode .form-group select,
+        body.admin-mode .form-group textarea {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .form-group input:focus,
+        body.admin-mode .form-group select:focus,
+        body.admin-mode .form-group textarea:focus {
+            border-color: #f59e0b !important;
+        }
+        body.admin-mode .admin-resource-item {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .admin-resource-item:hover {
+            border-color: #f59e0b !important;
+        }
+        body.admin-mode .filter-select,
+        body.admin-mode .search-input {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .filter-select option {
+            background: #1e293b !important;
+        }
+        body.admin-mode .upload-area {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .upload-area:hover {
+            border-color: #f59e0b !important;
+        }
+        body.admin-mode .search-section {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .week-nav {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .admin-search {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .admin-search input {
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .bulk-upload-area {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .bulk-upload-area textarea {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .admin-header h2 {
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .admin-header h2 i {
+            color: #f59e0b !important;
+        }
+        body.admin-mode .stat-label {
+            color: #94a3b8 !important;
+        }
+        body.admin-mode .admin-resource-info .title {
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .admin-resource-info .lecturer {
+            color: #94a3b8 !important;
+        }
+        body.admin-mode .admin-resource-info .category-tag {
+            background: #1e293b !important;
+            color: #94a3b8 !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .admin-resource-info .week-badge {
+            background: #f59e0b !important;
+            color: #0f172a !important;
+        }
+        body.admin-mode .btn-outline-premium {
+            border-color: #334155 !important;
+            color: #94a3b8 !important;
+        }
+        body.admin-mode .btn-outline-premium:hover {
+            background: rgba(255,255,255,0.05) !important;
+        }
+        body.admin-mode .badge-premium {
+            background: #f59e0b !important;
+            color: #0f172a !important;
+        }
+        body.admin-mode .upload-hint {
+            color: #64748b !important;
+        }
+        body.admin-mode .file-preview-item {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .login-box {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        body.admin-mode .login-box h2 {
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .login-box p {
+            color: #94a3b8 !important;
+        }
+        body.admin-mode .form-group label {
+            color: #f1f5f9 !important;
+        }
+        body.admin-mode .login-box input {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+    </style>
+</head>
+<body class="admin-mode">
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h2>Admin <span>Access</span></h2>
+                <p>Enter your credentials to manage resources</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password..." required>
+                </div>
+                <button type="submit" class="btn-premium" style="width:100%; justify-content:center;">
+                    <i class="fas fa-arrow-right"></i> Login
+                </button>
+            </form>
+            <div class="login-error" id="loginError">
+                <i class="fas fa-exclamation-circle"></i> Invalid password. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Content -->
+    <div id="adminContent" class="hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="brand-text">
+                        <h1><i class="fas fa-graduation-cap" style="color: #f59e0b;"></i> Admin <span>Dashboard</span></h1>
+                        <span class="subtitle">Manage BMS BANK Resources</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-premium-outline" onclick="admin.logout()" style="color: #f1f5f9; border-color: #ef4444;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="container">
+            <!-- Admin Stats -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="stat-number" id="adminTotalResources">0</span>
+                    <span class="stat-label">Total Resources</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-week"></i>
+                    <span class="stat-number">19</span>
+                    <span class="stat-label">Weeks</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-upload"></i>
+                    <span class="stat-number" id="adminTodayUploads">0</span>
+                    <span class="stat-label">Today's Uploads</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <span class="stat-number" id="adminStudents">1,200+</span>
+                    <span class="stat-label">Students</span>
+                </div>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2><i class="fas fa-upload"></i> Upload New Resource</h2>
+                    <span class="badge-premium">Premium</span>
+                </div>
+                
+                <form id="uploadForm" class="admin-form" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-week"></i> Week Number *</label>
+                            <select id="weekNumber" name="week_number" required>
+                                <option value="">Select Week</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Category *</label>
+                            <select id="category" name="category" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-day"></i> Day of Week</label>
+                            <select id="dayOfWeek" name="day_of_week">
+                                <option value="">Select Day</option>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-clock"></i> Time Slot</label>
+                            <select id="timeSlot" name="time_slot">
+                                <option value="">Select Time</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-heading"></i> Resource Title *</label>
+                        <input type="text" id="title" name="title" placeholder="e.g., Introduction to Anatomy Lecture" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-user-tie"></i> Lecturer Name</label>
+                        <input type="text" id="lecturerName" name="lecturer_name" placeholder="e.g., Dr. John Manda">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-align-left"></i> Description</label>
+                        <textarea id="description" name="description" rows="3" placeholder="Brief description of the resource..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fab fa-google-drive"></i> Google Drive Link</label>
+                        <input type="url" id="googleDriveLink" name="google_drive_link" placeholder="https://drive.google.com/...">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-file-upload"></i> Upload File</label>
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p>Drag & drop your file here or <span class="upload-link">browse</span></p>
+                            <p class="upload-hint">Supports PDF, PPT, DOC, Images, Videos</p>
+                            <input type="file" id="fileInput" name="file" style="display: none;" accept=".pdf,.ppt,.pptx,.doc,.docx,.jpg,.jpeg,.png,.gif,.mp4">
+                        </div>
+                        <div id="filePreview" style="display: none;">
+                            <div class="file-preview-item">
+                                <span><i class="fas fa-file"></i> <span id="fileName">file.pdf</span></span>
+                                <button type="button" onclick="removeFile()"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-premium" id="uploadBtn" style="min-width: 180px; position: relative; overflow: hidden;">
+                            <span id="uploadBtnContent"><i class="fas fa-upload"></i> Upload Resource</span>
+                            <div id="uploadProgressBar" style="position: absolute; bottom: 0; left: 0; height: 3px; background: #f59e0b; width: 0%; transition: width 0.3s ease; border-radius: 0 0 8px 8px;"></div>
+                        </button>
+                        <button type="reset" class="btn-premium-outline" style="color: var(--text); border-color: var(--border);">
+                            <i class="fas fa-undo"></i> Clear Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bulk Upload -->
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2><i class="fas fa-layer-group"></i> Bulk Upload</h2>
+                    <span class="badge-premium">Beta</span>
+                </div>
+                <div class="bulk-upload-area">
+                    <p><i class="fas fa-info-circle"></i> Paste Google Drive links (one per line) to import multiple files</p>
+                    <textarea id="bulkLinks" rows="4" placeholder="https://drive.google.com/file/d/...&#10;https://drive.google.com/file/d/..."></textarea>
+                    <div class="form-actions">
+                        <button class="btn-premium" onclick="bulkUpload()">
+                            <i class="fas fa-cloud-upload-alt"></i> Import All
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Resources -->
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2><i class="fas fa-list"></i> Manage Resources</h2>
+                    <div class="admin-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="adminSearch" placeholder="Search resources...">
+                    </div>
+                </div>
+                <div id="adminResourcesList">
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>Loading resources...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

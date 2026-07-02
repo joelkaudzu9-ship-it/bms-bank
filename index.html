@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>BMS BANK - MBBS & BDS Resource Bank</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="shortcut icon" href="assets/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader-content">
+            <div class="loader-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h2>BMS <span>BANK</span></h2>
+            <p>Loading resources...</p>
+            <div class="loader-bar">
+                <div class="loader-progress" id="loaderProgress"></div>
+            </div>
+            <div class="loader-percent" id="loaderPercent">0%</div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header glass" id="mainHeader">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo-wrapper">
+                    <img src="assets/logo.png" alt="KUHeS" class="logo" onerror="this.style.display='none'">
+                    <div class="brand-text">
+                        <h1>BMS <span>BANK</span></h1>
+                        <span class="subtitle">MBBS & BDS · Semester 1</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" id="themeToggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <!-- Admin button removed from header -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Your Medical <span>Resource Hub</span></h1>
+                <p>Access all MBBS & BDS Semester 1 lecture notes, practicals, and study materials in one place</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="heroResources">0</span>
+                        <span class="hero-stat-label">Resources</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number">19</span>
+                        <span class="hero-stat-label">Weeks</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="heroLecturers">0</span>
+                        <span class="hero-stat-label">Lecturers</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-illustration">
+                    <i class="fas fa-book-medical"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Quick Stats -->
+        <div class="quick-stats" id="quickStats">
+            <div class="stat-item">
+                <i class="fas fa-file-pdf"></i>
+                <span class="stat-value" id="totalResources">0</span>
+                <span class="stat-label">Total Resources</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-user-graduate"></i>
+                <span class="stat-value" id="totalLecturers">0</span>
+                <span class="stat-label">Lecturers</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-folder-open"></i>
+                <span class="stat-value" id="totalCategories">0</span>
+                <span class="stat-label">Categories</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-calendar-week"></i>
+                <span class="stat-value">19</span>
+                <span class="stat-label">Weeks</span>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <section class="search-section glass">
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search resources by title, lecturer, or topic...">
+                    <button class="search-clear" id="searchClear"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="filter-group">
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="all">All Categories</option>
+                    </select>
+                    <select id="weekFilter" class="filter-select">
+                        <option value="all">All Weeks</option>
+                    </select>
+                    <select id="sortFilter" class="filter-select">
+                        <option value="newest">Latest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="week">By Week</option>
+                        <option value="alpha">Alphabetical</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Week Navigation -->
+        <nav class="week-nav" id="weekNav">
+            <button class="week-btn active" data-week="all">
+                <i class="fas fa-calendar-alt"></i> All Weeks
+            </button>
+        </nav>
+
+        <!-- Resources Grid -->
+        <div id="resourcesContainer">
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading resources...</p>
+            </div>
+        </div>
+
+        <!-- Load More -->
+        <div class="load-more-container" id="loadMoreContainer" style="display: none;">
+            <button class="btn-load-more glass" id="loadMoreBtn">
+                <i class="fas fa-chevron-down"></i> Load More Resources
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer - Joel's Lab Branding with Hidden Admin Trigger -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <div>
+                    <h3>BMS <span>BANK</span></h3>
+                    <span class="footer-sub">Powered by</span>
+                </div>
+            </div>
+            <div class="footer-joels-lab">
+                <span class="heart"><i class="fas fa-heart"></i></span>
+                <span class="lab">Joel's Lab</span>
+                <span class="tag">v2.0</span>
+                <!-- Hidden Admin Trigger - A tiny dot that opens admin on double click -->
+                <span class="admin-trigger-dot" id="adminTriggerDot" title="Admin Access (Double Click)">•</span>
+            </div>
+            <p>© 2026 · Built with <i class="fas fa-heart" style="color: #ef4444;"></i> for MBBS & BDS Students</p>
+            <p class="footer-credit">Kamuzu University of Health Sciences · Malawi</p>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
