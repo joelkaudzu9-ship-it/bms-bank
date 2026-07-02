@@ -17,4 +17,4 @@ ENV PYTHONUNBUFFERED=1
 ENV FLASK_APP=python/app.py
 
 # Run the app
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--chdir", "python", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--chdir", "python", "app:app"]
