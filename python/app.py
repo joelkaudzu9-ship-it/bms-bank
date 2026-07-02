@@ -16,7 +16,7 @@ load_dotenv()
 app = Flask(__name__, static_folder='../', static_url_path='/')
 
 # Enable CORS for all routes
-CORS(app, origins=['http://localhost:5000', 'http://127.0.0.1:5000', 'http://localhost:5500'])
+CORS(app, origins=['*'])
 
 # Supabase
 SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL')
@@ -30,7 +30,7 @@ if not SUPABASE_URL or not SUPABASE_ANON_KEY:
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 supabase_admin = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-# Cloudinary
+# Cloudinary - NO PROXY NEEDED ON FLY.IO
 cloudinary.config(
     cloud_name=os.getenv('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME'),
     api_key=os.getenv('CLOUDINARY_API_KEY'),
@@ -131,79 +131,10 @@ def upload_resource():
         # Check admin password
         password = request.headers.get('X-Admin-Password')
         print(f"🔑 Password header: {password}")
-        print(f"🔑 Expected: {ADMIN_PASSWORD}")
         
         if password != ADMIN_PASSWORD:
             print("❌ Unauthorized - wrong password")
             return jsonify({'error': 'Unauthorized'}), 401
-        
-        # Log form data
-        print("📝 Form data:")
-        for key, value in request.form.items():
-            print(f"  {key}: {value}")
-        
-        # Check if file was sent
-        if 'file' not in request.files:
-            print("❌ No file in request")
-            # Check if there's a google drive link instead
-            google_drive_link = request.form.get('google_drive_link', '')
-            if google_drive_link:
-                print("✅ Using Google Drive link instead")
-            else:
-                return jsonify({'error': 'No file uploaded. Please select a file or provide a Google Drive link.'}), 400
-        
-        file = request.files.get('file')
-        file_url = None
-        file_public_id = None
-        
-        if file and file.filename:
-            print(f"📄 File: {file.filename}")
-            print(f"📏 File size: {file.content_length if hasattr(file, 'content_length') else 'unknown'}")
-            
-            if file.filename == '':
-                print("❌ Empty filename")
-                return jsonify({'error': 'Empty file. Please select a valid file.'}), 400
-            
-            # Try to upload to Cloudinary with preset
-            try:
-                print("☁️ Uploading to Cloudinary...")
-                # Try with upload preset
-                try:
-                    upload_result = cloudinary.uploader.upload(
-                        file,
-                        upload_preset='bms_bank',
-                        folder=f'bms-bank/week_{request.form.get("week_number")}',
-                        resource_type='auto'
-                    )
-                    file_url = upload_result.get('secure_url')
-                    file_public_id = upload_result.get('public_id')
-                    print(f"✅ Uploaded to Cloudinary with preset: {file_url}")
-                except Exception as e:
-                    print(f"⚠️ Preset failed: {e}")
-                    # Try without preset
-                    try:
-                        upload_result = cloudinary.uploader.upload(
-                            file,
-                            folder=f'bms-bank/week_{request.form.get("week_number")}',
-                            resource_type='auto'
-                        )
-                        file_url = upload_result.get('secure_url')
-                        file_public_id = upload_result.get('public_id')
-                        print(f"✅ Uploaded to Cloudinary (direct): {file_url}")
-                    except Exception as e2:
-                        print(f"⚠️ Cloudinary failed: {e2}")
-                        # Save locally
-                        try:
-                            filename = f"week_{request.form.get('week_number')}_{file.filename}"
-                            file_path = os.path.join('uploads', filename)
-                            file.save(file_path)
-                            file_url = f"/uploads/{filename}"
-                            print(f"✅ Saved locally: {file_path}")
-                        except Exception as e3:
-                            return jsonify({'error': f'File upload failed: {str(e3)}'}), 500
-            except Exception as e:
-                print(f"❌ Upload error: {e}")
-                return jsonify({'error': f'File upload failed: {str(e)}'}), 500
         
         # Get form data
         week_number = request.form.get('week_number')
@@ -219,7 +150,6 @@ def upload_resource():
         print(f"📝 Week: {week_number}")
         print(f"📝 Title: {title}")
         print(f"📝 Category: {category}")
-        print(f"📝 Drive link: {google_drive_link}")
         
         # Validate required fields
         if not week_number:
@@ -228,6 +158,40 @@ def upload_resource():
             return jsonify({'error': 'Title is required'}), 400
         if not category:
             return jsonify({'error': 'Category is required'}), 400
+        
+        file_url = None
+        file_public_id = None
+        
+        # Handle file upload
+        if 'file' in request.files:
+            file = request.files['file']
+            if file and file.filename:
+                print(f"📄 File: {file.filename}")
+                
+                if file.filename == '':
+                    return jsonify({'error': 'Empty file. Please select a valid file.'}), 400
+                
+                try:
+                    # Upload to Cloudinary - WORKS ON FLY.IO!
+                    upload_result = cloudinary.uploader.upload(
+                        file,
+                        folder=f'bms-bank/week_{week_number}',
+                        resource_type='auto'
+                    )
+                    file_url = upload_result.get('secure_url')
+                    file_public_id = upload_result.get('public_id')
+                    print(f"✅ Uploaded to Cloudinary: {file_url}")
+                except Exception as e:
+                    print(f"❌ Cloudinary upload failed: {e}")
+                    # Fallback: Save locally
+                    try:
+                        filename = f"week_{week_number}_{file.filename}"
+                        file_path = os.path.join('uploads', filename)
+                        file.save(file_path)
+                        file_url = f"/uploads/{filename}"
+                        print(f"✅ Saved locally: {file_path}")
+                    except Exception as e2:
+                        return jsonify({'error': f'File upload failed: {str(e2)}'}), 500
         
         # Prepare data for Supabase
         resource_data = {
@@ -283,7 +247,7 @@ def delete_resource(resource_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Serve uploaded files
+# Serve uploaded files (fallback for local storage)
 @app.route('/uploads/<path:filename>')
 def serve_upload(filename):
     return send_from_directory('uploads', filename)

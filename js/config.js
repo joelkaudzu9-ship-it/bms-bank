@@ -1,6 +1,5 @@
-// Configuration
 const CONFIG = {
-    API_URL: 'http://localhost:5000/api',
+    API_URL: 'https://bms-bank.fly.dev/api',
     ADMIN_PASSWORD: 'BMS2026Admin',
     BANK_NAME: 'BMS BANK',
     WEEKS: Array.from({length: 19}, (_, i) => i + 1),
