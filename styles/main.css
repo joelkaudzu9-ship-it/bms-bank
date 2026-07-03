@@ -2681,3 +2681,278 @@ body {
     border-color: var(--secondary);
     box-shadow: 0 0 30px rgba(201, 168, 76, 0.2);
 }
+
+/* ============================================
+   SCROLL TO TOP BUTTON
+   ============================================ */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--gradient-secondary);
+    color: var(--primary);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(201, 168, 76, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scroll-top-btn.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.scroll-top-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 32px rgba(201, 168, 76, 0.4);
+}
+
+.scroll-top-btn:active {
+    transform: scale(0.9);
+}
+
+@media (max-width: 768px) {
+    .scroll-top-btn {
+        bottom: 70px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* ============================================
+   POPULAR BADGE
+   ============================================ */
+.popular-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.1rem 0.6rem;
+    border-radius: var(--radius-full);
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    font-size: 0.6rem;
+    font-weight: 600;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
+   HOW TO USE SECTION
+   ============================================ */
+.how-to-use {
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition);
+}
+
+.how-to-use:hover {
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+    border-color: var(--secondary);
+}
+
+.how-to-use-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.how-to-use-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.how-to-use-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    transition: var(--transition);
+}
+
+.step:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(4px);
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--gradient-secondary);
+    color: var(--primary);
+    font-size: 0.6rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.step-text {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+@media (max-width: 768px) {
+    .how-to-use-steps {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   ANNOUNCEMENT BANNER
+   ============================================ */
+.announcement-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    box-shadow: var(--glass-shadow);
+    position: relative;
+}
+
+.announcement-banner i {
+    color: var(--secondary);
+    font-size: 1.1rem;
+}
+
+.announcement-banner span {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.announcement-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+    transition: var(--transition);
+    border-radius: 50%;
+}
+
+.announcement-close:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+    .announcement-banner {
+        flex-wrap: wrap;
+        padding: 0.6rem 1rem;
+    }
+    
+    .announcement-banner span {
+        font-size: 0.8rem;
+    }
+}
+
+/* ============================================
+   COMING SOON SECTION
+   ============================================ */
+.coming-soon {
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition);
+}
+
+.coming-soon:hover {
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+    border-color: var(--secondary);
+}
+
+.coming-soon h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.coming-soon ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+}
+
+.coming-soon ul li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.8rem;
+    color: var(--text-light);
+    border: 1px solid transparent;
+    transition: var(--transition);
+}
+
+.coming-soon ul li:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border);
+    transform: translateY(-2px);
+}
+
+.coming-soon ul li i {
+    color: var(--secondary);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .coming-soon ul li {
+        width: 100%;
+    }
+}

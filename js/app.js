@@ -67,6 +67,7 @@ class BMSBank {
         this.setupQuickAccess();
         this.setupHeroParticles();
         this.setupTrackerToggle();
+        this.setupScrollToTop();
         this.hideLoadingScreen();
         this.updateStats();
         this.updateProgressBar();
@@ -86,6 +87,50 @@ class BMSBank {
                 top: offsetPosition,
                 behavior: 'smooth'
             });
+        }
+    }
+
+    // ============================================
+    // SCROLL TO TOP BUTTON
+    // ============================================
+    setupScrollToTop() {
+        const btn = document.getElementById('scrollTopBtn');
+        if (!btn) return;
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+    }
+
+    // ============================================
+    // TRACK POPULAR RESOURCES
+    // ============================================
+    trackResourceView(resourceId) {
+        let views = JSON.parse(localStorage.getItem('bms-resource-views') || '{}');
+        views[resourceId] = (views[resourceId] || 0) + 1;
+        localStorage.setItem('bms-resource-views', JSON.stringify(views));
+        this.updatePopularBadge(resourceId, views[resourceId]);
+    }
+
+    updatePopularBadge(resourceId, viewCount) {
+        const card = document.querySelector(`.resource-card[data-id="${resourceId}"]`);
+        if (!card) return;
+        
+        if (viewCount > 10) {
+            const badge = card.querySelector('.popular-badge');
+            if (!badge) {
+                const badgeContainer = card.querySelector('.resource-card-badge');
+                if (badgeContainer) {
+                    const span = document.createElement('span');
+                    span.className = 'popular-badge';
+                    span.innerHTML = `<i class="fas fa-fire" style="color: #f59e0b;"></i> Popular`;
+                    badgeContainer.appendChild(span);
+                }
+            }
         }
     }
 
@@ -129,13 +174,10 @@ class BMSBank {
     }
 
     // ============================================
-    // DOWNLOAD TRACKER PDF - FIXED (Direct Print)
+    // DOWNLOAD TRACKER PDF
     // ============================================
     downloadTrackerPDF() {
-        // Track the download
         this.trackDownload();
-        
-        // Open PDF in new tab for printing
         const printWindow = window.open(this.trackerPDFUrl, '_blank');
         if (printWindow) {
             printWindow.onload = function() {
@@ -148,7 +190,7 @@ class BMSBank {
     }
 
     // ============================================
-    // TRACKER TOGGLE - FIXED (Auto-scroll)
+    // TRACKER TOGGLE
     // ============================================
     setupTrackerToggle() {
         const toggleBtn = document.getElementById('trackerToggle');
@@ -176,12 +218,11 @@ class BMSBank {
             this.renderResources();
         }
         
-        // Auto-scroll to resources/tracker
         setTimeout(() => this.scrollToResources(), 300);
     }
 
     // ============================================
-    // STUDY TRACKER - COMPLETE 19 WEEKS
+    // STUDY TRACKER
     // ============================================
     renderStudyTracker() {
         const container = document.getElementById('resourcesContainer');
@@ -217,7 +258,6 @@ class BMSBank {
             weekData.days[day] && weekData.days[day].length > 0
         );
         
-        // Calculate progress for this week
         let total = 0;
         let studied = 0;
         let revised = 0;
@@ -235,8 +275,6 @@ class BMSBank {
         });
         
         const pct = total > 0 ? Math.round((studied / total) * 100) : 0;
-        
-        // Get download stats
         const stats = this.downloadStats;
         
         let html = `
@@ -296,7 +334,6 @@ class BMSBank {
             );
             if (activities.length === 0) return;
             
-            // Count studied for this day
             let dayStudied = 0;
             activities.forEach((activity, idx) => {
                 const id = `tracker_${week}_${day}_${idx}`;
@@ -404,7 +441,6 @@ class BMSBank {
             else if (studied) activity.classList.add('studied');
         }
         
-        // Re-render tracker to update stats
         const week = parseInt(id.split('_')[1]);
         setTimeout(() => this.renderStudyTracker(), 100);
     }
@@ -499,7 +535,7 @@ class BMSBank {
     }
 
     // ============================================
-    // RESOURCES - FIXED (Show all, not just 49)
+    // RESOURCES
     // ============================================
     async loadResources(append = false) {
         if (this.loading) return;
@@ -513,7 +549,6 @@ class BMSBank {
         }
 
         try {
-            // FIXED: Increased limit to 200 to show all resources
             let url = `${CONFIG.API_URL}/resources?limit=200&page=${this.page}`;
             
             if (this.currentWeek !== 'all' && this.currentWeek !== '') {
@@ -541,7 +576,6 @@ class BMSBank {
                 this.resources = data;
             }
             
-            // FIXED: Show all resources, don't hide based on limit
             this.hasMore = false;
             this.totalResources = this.resources.length;
             this.isFirstLoad = false;
@@ -740,8 +774,12 @@ class BMSBank {
             `;
         }
 
+        // Track view when card is clicked
+        const cardId = resource.id;
+        setTimeout(() => this.trackResourceView(cardId), 100);
+
         return `
-            <div class="resource-card" data-id="${resource.id}">
+            <div class="resource-card" data-id="${resource.id}" onclick="window.bmsBank.trackResourceView('${resource.id}')">
                 <div class="resource-card-badge">
                     <span class="week-badge"><i class="fas fa-calendar-week"></i> Week ${resource.week_number || 'N/A'}</span>
                     ${resource.file_url ? `<span class="file-type-badge" style="background: ${fileColor}22; color: ${fileColor}; border-color: ${fileColor}44;"><i class="fas ${fileIcon}"></i> ${fileType}</span>` : ''}
@@ -947,7 +985,7 @@ class BMSBank {
     }
 
     // ============================================
-    // EVENT LISTENERS - FIXED (Search scroll)
+    // EVENT LISTENERS
     // ============================================
     setupEventListeners() {
         let searchTimeout;
@@ -982,7 +1020,6 @@ class BMSBank {
                 this.page = 1;
                 this.isFirstLoad = true;
                 this.loadResources();
-                // FIXED: Scroll to resources after search
                 this.scrollToResources();
                 console.log('🔍 Searching for:', this.currentSearch);
             }, 400);
@@ -1161,7 +1198,7 @@ class BMSBank {
     }
 
     // ============================================
-    // WEEK NAVIGATION - FIXED (All Weeks shows all)
+    // WEEK NAVIGATION
     // ============================================
     setupWeekNavigation() {
         const nav = document.getElementById('weekNav');
@@ -1194,7 +1231,6 @@ class BMSBank {
             nav.appendChild(btn);
         }
         
-        // FIXED: Make sure "All Weeks" button works
         const allBtn = document.querySelector('.week-btn[data-week="all"]');
         if (allBtn) {
             allBtn.addEventListener('click', () => {

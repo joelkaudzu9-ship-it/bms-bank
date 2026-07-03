@@ -8,7 +8,6 @@
     <!-- ============================================ -->
     <!-- OPEN GRAPH / SOCIAL MEDIA PREVIEW           -->
     <!-- ============================================ -->
-    <!-- WhatsApp, Facebook, LinkedIn Preview -->
     <meta property="og:title" content="BMS BANK - Medical Resource Hub" />
     <meta property="og:description" content="All MBBS, BDS & BND Semester 1 lecture notes, practicals, and study materials in one place with interactive study tracker." />
     <meta property="og:image" content="https://bms-bank.fly.dev/assets/og-image.png" />
@@ -19,29 +18,20 @@
     <meta property="og:site_name" content="BMS BANK" />
     <meta property="og:locale" content="en_GB" />
     
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="BMS BANK - Medical Resource Hub" />
     <meta name="twitter:description" content="All MBBS, BDS & BND Semester 1 resources in one place with study tracker." />
     <meta name="twitter:image" content="https://bms-bank.fly.dev/assets/og-image.png" />
     
-    <!-- Additional Meta Tags -->
     <meta name="description" content="Access all MBBS, BDS & BND Semester 1 lecture notes, practicals, and study materials at Kamuzu University of Health Sciences." />
     <meta name="keywords" content="MBBS, BDS, BND, KUHeS, Medical Resources, Study Tracker, Semester 1, Malawi" />
     <meta name="author" content="NEURO~2026" />
     
-    <!-- ============================================ -->
-    <!-- STYLES & SCRIPTS                            -->
-    <!-- ============================================ -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="shortcut icon" href="assets/logo.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     
-    <!-- ============================================ -->
-    <!-- WHATSAPP PREVIEW FIX (Optional)             -->
-    <!-- ============================================ -->
-    <!-- Forces WhatsApp to use the OG image -->
     <meta property="og:image:secure_url" content="https://bms-bank.fly.dev/assets/og-image.png" />
     <meta property="og:image:type" content="image/png" />
 </head>
@@ -147,6 +137,56 @@
                 <span class="stat-value">19</span>
                 <span class="stat-label">Weeks</span>
             </div>
+        </div>
+
+        <!-- How to Use -->
+        <div class="how-to-use glass">
+            <div class="how-to-use-header">
+                <i class="fas fa-lightbulb" style="color: var(--secondary);"></i>
+                <h3>How to Use BMS BANK</h3>
+            </div>
+            <div class="how-to-use-steps">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <span class="step-text">🔍 Search for resources by topic or lecturer</span>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <span class="step-text">📂 Filter by week or category</span>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <span class="step-text">📥 Download resources directly</span>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <span class="step-text">✅ Track your study progress</span>
+                </div>
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <span class="step-text">📊 View your completion stats</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Announcement Banner -->
+        <div class="announcement-banner glass" id="announcementBanner">
+            <i class="fas fa-megaphone"></i>
+            <span id="announcementText">📚 New resources added weekly! Check back often.</span>
+            <button class="announcement-close" onclick="document.getElementById('announcementBanner').style.display='none'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Coming Soon -->
+        <div class="coming-soon glass">
+            <h3><i class="fas fa-rocket" style="color: var(--secondary);"></i> Coming Soon</h3>
+            <ul>
+                <li><i class="fas fa-mobile-alt"></i> Mobile App</li>
+                <li><i class="fas fa-robot"></i> AI Study Assistant</li>
+                <li><i class="fas fa-chart-bar"></i> Advanced Analytics</li>
+                <li><i class="fas fa-users"></i> Study Groups</li>
+            </ul>
         </div>
 
         <!-- Progress Bar -->
@@ -286,6 +326,11 @@
     <div class="keyboard-hint">
         <span>⌨️ Shortcuts: <kbd>Ctrl+K</kbd> Search · <kbd>Ctrl+1-9</kbd> Weeks · <kbd>Ctrl+D</kbd> Download All</span>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" class="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
