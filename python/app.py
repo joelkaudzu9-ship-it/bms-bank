@@ -8,14 +8,13 @@ import cloudinary
 import cloudinary.uploader
 from datetime import datetime
 import traceback
-import mimetypes
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__, static_folder='../', static_url_path='/')
 
-# Enable CORS for all routes
+# Enable CORS
 CORS(app, origins=['*'])
 
 # Supabase
@@ -30,7 +29,7 @@ if not SUPABASE_URL or not SUPABASE_ANON_KEY:
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 supabase_admin = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-# Cloudinary - NO PROXY NEEDED ON FLY.IO
+# Cloudinary - No proxy needed on Fly.io
 cloudinary.config(
     cloud_name=os.getenv('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME'),
     api_key=os.getenv('CLOUDINARY_API_KEY'),
@@ -130,8 +129,6 @@ def upload_resource():
         
         # Check admin password
         password = request.headers.get('X-Admin-Password')
-        print(f"🔑 Password header: {password}")
-        
         if password != ADMIN_PASSWORD:
             print("❌ Unauthorized - wrong password")
             return jsonify({'error': 'Unauthorized'}), 401
@@ -162,7 +159,7 @@ def upload_resource():
         file_url = None
         file_public_id = None
         
-        # Handle file upload
+        # Handle file upload - ALWAYS UPLOAD TO CLOUDINARY
         if 'file' in request.files:
             file = request.files['file']
             if file and file.filename:
@@ -172,26 +169,22 @@ def upload_resource():
                     return jsonify({'error': 'Empty file. Please select a valid file.'}), 400
                 
                 try:
-                    # Upload to Cloudinary - WORKS ON FLY.IO!
+                    # Upload to Cloudinary
                     upload_result = cloudinary.uploader.upload(
                         file,
                         folder=f'bms-bank/week_{week_number}',
-                        resource_type='auto'
+                        resource_type='auto',
+                        use_filename=True,
+                        unique_filename=False,
+                        overwrite=False,
+                        use_filename_as_display_name=True
                     )
                     file_url = upload_result.get('secure_url')
                     file_public_id = upload_result.get('public_id')
                     print(f"✅ Uploaded to Cloudinary: {file_url}")
                 except Exception as e:
                     print(f"❌ Cloudinary upload failed: {e}")
-                    # Fallback: Save locally
-                    try:
-                        filename = f"week_{week_number}_{file.filename}"
-                        file_path = os.path.join('uploads', filename)
-                        file.save(file_path)
-                        file_url = f"/uploads/{filename}"
-                        print(f"✅ Saved locally: {file_path}")
-                    except Exception as e2:
-                        return jsonify({'error': f'File upload failed: {str(e2)}'}), 500
+                    return jsonify({'error': f'File upload failed: {str(e)}'}), 500
         
         # Prepare data for Supabase
         resource_data = {
@@ -258,6 +251,5 @@ if __name__ == '__main__':
     print("="*50)
     print(f"📡 Admin Password: {ADMIN_PASSWORD}")
     print(f"🌐 Server: http://localhost:5000")
-    print(f"📁 Uploads folder: {os.path.abspath('uploads')}")
     print("="*50 + "\n")
     app.run(debug=True, port=8080, host='0.0.0.0')

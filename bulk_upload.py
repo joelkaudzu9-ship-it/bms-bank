@@ -9,28 +9,22 @@ import cloudinary.uploader
 # ============================================
 # CONFIGURATION
 # ============================================
-# Your Cloudinary credentials
 CLOUDINARY_CLOUD_NAME = "dhnmrojr2"
 CLOUDINARY_API_KEY = "686188139346171"
 CLOUDINARY_API_SECRET = "8un8_iuJU7NSa-Ao8pV_XIkKPwY"
 
-# Your Supabase API (for storing metadata)
 SUPABASE_URL = "https://vmfdwlmjvaswmxkiqgvk.supabase.co"
-SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZmR3bG1qdmFzd214a2lxZ3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMDI2MTEsImV4cCI6MjA5ODU3ODYxMX0.aTNaA0TyIwVwU7nFU2Q1lL67IP4x53qsH-Rkl3DTAiA"
 SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtZmR3bG1qdmFzd214a2lxZ3ZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzAwMjYxMSwiZXhwIjoyMDk4NTc4NjExfQ.RfZssnWZhRBUWnTOIq2I1yL1dk8ozlcu38Z0kJpAgBk"
 
-# Your files path
+# CHANGE THIS PATH TO YOUR FOLDER
 BASE_PATH = r"C:\Users\joelk\Desktop\Temporary\MBBS1_NOTES\MBBS 1\SEM 1\SEM 1"
-
-# Admin password for your app
-ADMIN_PASSWORD = "BMS2026Admin"
 
 # ============================================
 # CATEGORY MAPPING
 # ============================================
 CATEGORY_MAP = {
     "Anatomy": "Anatomy",
-    "Biochemistry": "Biochemistry", 
+    "Biochemistry": "Biochemistry",
     "Clinical skills": "Clinical Skills",
     "Clinical Skills": "Clinical Skills",
     "Microbiology": "Microbiology",
@@ -44,12 +38,6 @@ CATEGORY_MAP = {
     "Course Outline": "Lecture",
 }
 
-# Week mapping based on folder structure
-WEEK_MAP = {
-    "Half 1": range(1, 9),   # Weeks 1-8
-    "Half 2": range(9, 17),  # Weeks 9-16
-}
-
 # ============================================
 # INITIALIZE CLOUDINARY
 # ============================================
@@ -59,6 +47,10 @@ cloudinary.config(
     api_secret=CLOUDINARY_API_SECRET
 )
 
+print("☁️ Cloudinary configured successfully!")
+print(f"📁 Cloud Name: {CLOUDINARY_CLOUD_NAME}")
+print("")
+
 # ============================================
 # HELPER FUNCTIONS
 # ============================================
@@ -66,7 +58,6 @@ def get_week_from_path(file_path):
     """Determine week number from file path"""
     path = str(file_path).lower()
     
-    # Try to extract from folder name
     if "half 1" in path:
         if "anatomy" in path: return 1
         elif "biochemistry" in path: return 2
@@ -99,7 +90,7 @@ def get_category_from_path(file_path):
     return "Lecture"
 
 def extract_lecturer(filename):
-    """Extract lecturer name from filename if present"""
+    """Extract lecturer name from filename"""
     name = filename.replace("_", " ").replace("-", " ")
     patterns = ["Dr.", "Dr", "Prof.", "Prof", "Mr.", "Ms.", "Mrs."]
     for pattern in patterns:
@@ -114,12 +105,16 @@ def extract_lecturer(filename):
     return ""
 
 def upload_to_cloudinary(file_path, week):
-    """Upload file to Cloudinary"""
+    """Upload file to Cloudinary with correct settings"""
     try:
         result = cloudinary.uploader.upload(
             file_path,
             folder=f"bms-bank/week_{week}",
-            resource_type="auto"
+            resource_type="auto",
+            use_filename=True,
+            unique_filename=False,
+            overwrite=False,
+            use_filename_as_display_name=True
         )
         return {
             'url': result.get('secure_url'),
@@ -127,7 +122,7 @@ def upload_to_cloudinary(file_path, week):
             'bytes': result.get('bytes', 0)
         }
     except Exception as e:
-        print(f"❌ Cloudinary upload failed: {e}")
+        print(f"   ❌ Cloudinary upload failed: {e}")
         return None
 
 def save_to_supabase(resource_data, file_url):
@@ -157,7 +152,7 @@ def save_to_supabase(resource_data, file_url):
         )
         return response.status_code in [200, 201]
     except Exception as e:
-        print(f"❌ Supabase save failed: {e}")
+        print(f"   ❌ Supabase save failed: {e}")
         return False
 
 def scan_and_upload():
@@ -166,8 +161,13 @@ def scan_and_upload():
     print("📦 BMS BANK - BULK UPLOAD TO CLOUDINARY")
     print("="*70)
     print(f"📁 Source: {BASE_PATH}")
-    print(f"☁️ Cloudinary: {CLOUDINARY_CLOUD_NAME}")
     print("="*70 + "\n")
+    
+    # Check if path exists
+    if not os.path.exists(BASE_PATH):
+        print(f"❌ ERROR: Path not found: {BASE_PATH}")
+        print("Please update BASE_PATH in the script to your correct folder.")
+        return
     
     # Collect all files
     all_files = []
@@ -220,7 +220,7 @@ def scan_and_upload():
         upload_result = upload_to_cloudinary(file_path, week)
         
         if upload_result:
-            print(f"   ✅ Uploaded: {upload_result['url'][:80]}...")
+            print(f"   ✅ Uploaded: {upload_result['url'][:60]}...")
             
             # Prepare resource data
             resource_data = {
@@ -265,8 +265,16 @@ def scan_and_upload():
 # ============================================
 if __name__ == "__main__":
     print("\n⚠️  Make sure you have cloudinary installed:")
-    print("   pip install cloudinary")
+    print("   pip install cloudinary requests")
     print("")
-    input("Press ENTER to start uploading...")
     
+    # Verify BASE_PATH exists
+    if not os.path.exists(BASE_PATH):
+        print(f"❌ ERROR: BASE_PATH not found: {BASE_PATH}")
+        print("Please edit the script and update BASE_PATH to your folder.")
+        print("")
+        input("Press ENTER to exit...")
+        exit()
+    
+    input("Press ENTER to start uploading...")
     scan_and_upload()
