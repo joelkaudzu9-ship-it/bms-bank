@@ -14,7 +14,7 @@ load_dotenv()
 
 app = Flask(__name__, static_folder='../', static_url_path='/')
 
-# Enable CORS
+# Enable CORS for all origins
 CORS(app, origins=['*'])
 
 # Supabase
@@ -169,7 +169,7 @@ def upload_resource():
                     return jsonify({'error': 'Empty file. Please select a valid file.'}), 400
                 
                 try:
-                    # Upload to Cloudinary
+                    # Upload to Cloudinary with fl_attachment for force download
                     upload_result = cloudinary.uploader.upload(
                         file,
                         folder=f'bms-bank/week_{week_number}',

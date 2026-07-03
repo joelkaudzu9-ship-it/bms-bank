@@ -1,4 +1,4 @@
-// Admin Panel - BMS BANK
+// Admin Panel - BMS BANK Premium
 class BMSAdmin {
     constructor() {
         this.isLoggedIn = false;
@@ -63,7 +63,6 @@ class BMSAdmin {
     }
 
     setupEventListeners() {
-        // File upload drag and drop
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
 
@@ -91,7 +90,6 @@ class BMSAdmin {
             });
         }
 
-        // Form submission
         const form = document.getElementById('uploadForm');
         if (form) {
             form.addEventListener('submit', (e) => {
@@ -100,7 +98,6 @@ class BMSAdmin {
             });
         }
 
-        // Admin search
         const searchInput = document.getElementById('adminSearch');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -131,41 +128,28 @@ class BMSAdmin {
         const progressBar = document.getElementById('uploadProgressBar');
         const btnContent = document.getElementById('uploadBtnContent');
         
-        // LOG EVERYTHING - Check what's being sent
-        console.log('=== UPLOAD DEBUG ===');
-        console.log('Form data entries:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`  ${key}: ${value instanceof File ? `FILE: ${value.name} (${value.size} bytes)` : value}`);
-        }
-        
         const weekNumber = document.getElementById('weekNumber').value;
         const title = document.getElementById('title').value;
         const category = document.getElementById('category').value;
         const fileInput = document.getElementById('fileInput');
         
-        console.log('Week:', weekNumber);
-        console.log('Title:', title);
-        console.log('Category:', category);
-        console.log('File input:', fileInput.files.length > 0 ? fileInput.files[0].name : 'NO FILE SELECTED');
-        
         if (!weekNumber) {
-            admin.showToast('❌ Please select a week number', 'error');
+            this.showToast('❌ Please select a week number', 'error');
             return;
         }
         if (!title) {
-            admin.showToast('❌ Please enter a title', 'error');
+            this.showToast('❌ Please enter a title', 'error');
             return;
         }
         if (!category) {
-            admin.showToast('❌ Please select a category', 'error');
+            this.showToast('❌ Please select a category', 'error');
             return;
         }
         if (fileInput.files.length === 0) {
-            admin.showToast('⚠️ No file selected. Upload a file or use Google Drive link.', 'error');
+            this.showToast('⚠️ No file selected. Upload a file or use Google Drive link.', 'error');
             return;
         }
         
-        // Show loading
         btnContent.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading... 0%';
         uploadBtn.disabled = true;
         progressBar.style.width = '0%';
@@ -188,17 +172,16 @@ class BMSAdmin {
             });
 
             const result = await response.json();
-            console.log('Server response:', result);
             
             clearInterval(progressInterval);
             progressBar.style.width = '100%';
             
             if (result.success) {
                 btnContent.innerHTML = '<i class="fas fa-check-circle"></i> Upload Complete!';
-                admin.showToast('✅ Resource uploaded successfully!', 'success');
+                this.showToast('✅ Resource uploaded successfully!', 'success');
                 form.reset();
                 document.getElementById('filePreview').style.display = 'none';
-                admin.loadAdminResources();
+                this.loadAdminResources();
                 
                 setTimeout(() => {
                     btnContent.innerHTML = '<i class="fas fa-upload"></i> Upload Resource';
@@ -206,7 +189,7 @@ class BMSAdmin {
                     progressBar.style.width = '0%';
                 }, 1500);
             } else {
-                admin.showToast('❌ Upload failed: ' + (result.error || 'Unknown error'), 'error');
+                this.showToast('❌ Upload failed: ' + (result.error || 'Unknown error'), 'error');
                 btnContent.innerHTML = '<i class="fas fa-upload"></i> Upload Resource';
                 uploadBtn.disabled = false;
                 progressBar.style.width = '0%';
@@ -214,7 +197,7 @@ class BMSAdmin {
         } catch (error) {
             clearInterval(progressInterval);
             console.error('Upload error:', error);
-            admin.showToast('❌ Error uploading: ' + error.message, 'error');
+            this.showToast('❌ Error uploading: ' + error.message, 'error');
             btnContent.innerHTML = '<i class="fas fa-upload"></i> Upload Resource';
             uploadBtn.disabled = false;
             progressBar.style.width = '0%';
@@ -226,9 +209,9 @@ class BMSAdmin {
         if (!container) return;
         
         container.innerHTML = `
-            <div class="loading-state">
-                <div class="loading-spinner"></div>
-                <p>Loading resources...</p>
+            <div class="loading-state" style="text-align:center;padding:2rem;">
+                <div class="loading-spinner" style="display:inline-block;width:30px;height:30px;border:2px solid var(--border);border-top:2px solid var(--secondary);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                <p style="margin-top:0.5rem;color:var(--text-muted);">Loading resources...</p>
             </div>
         `;
         
@@ -240,10 +223,10 @@ class BMSAdmin {
         } catch (error) {
             console.error('Error loading admin resources:', error);
             container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <h3>Failed to load resources</h3>
-                    <p>Please refresh and try again</p>
+                <div class="empty-state" style="text-align:center;padding:2rem;">
+                    <i class="fas fa-exclamation-circle" style="font-size:2rem;opacity:0.3;"></i>
+                    <h3 style="margin:0.5rem 0;color:var(--text);">Failed to load resources</h3>
+                    <p style="color:var(--text-muted);">Please refresh and try again</p>
                 </div>
             `;
         }
@@ -255,10 +238,10 @@ class BMSAdmin {
         
         if (!this.resources || this.resources.length === 0) {
             container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <h3>No resources yet</h3>
-                    <p>Start uploading resources using the form above</p>
+                <div class="empty-state" style="text-align:center;padding:2rem;">
+                    <i class="fas fa-inbox" style="font-size:2rem;opacity:0.3;"></i>
+                    <h3 style="margin:0.5rem 0;color:var(--text);">No resources yet</h3>
+                    <p style="color:var(--text-muted);">Start uploading resources using the form above</p>
                 </div>
             `;
             return;

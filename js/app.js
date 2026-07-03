@@ -1,4 +1,4 @@
-// Main Application - BMS BANK
+// Main Application - BMS BANK Premium
 class BMSBank {
     constructor() {
         this.resources = [];
@@ -11,6 +11,7 @@ class BMSBank {
         this.hasMore = true;
         this.loading = false;
         this.totalResources = 0;
+        this.isFirstLoad = true;
         
         this.init();
     }
@@ -24,6 +25,7 @@ class BMSBank {
         this.setupThemeToggle();
         this.setupKeyboardShortcuts();
         this.setupQuickAccess();
+        this.setupHeroParticles();
         this.hideLoadingScreen();
         this.updateStats();
         this.updateProgressBar();
@@ -54,6 +56,22 @@ class BMSBank {
         }, 150);
     }
 
+    setupHeroParticles() {
+        const container = document.getElementById('heroParticles');
+        if (!container) return;
+        for (let i = 0; i < 20; i++) {
+            const span = document.createElement('span');
+            const size = Math.random() * 3 + 2;
+            span.style.width = size + 'px';
+            span.style.height = size + 'px';
+            span.style.left = Math.random() * 100 + '%';
+            span.style.top = Math.random() * 100 + '%';
+            span.style.animationDelay = Math.random() * 6 + 's';
+            span.style.animationDuration = (Math.random() * 4 + 4) + 's';
+            container.appendChild(span);
+        }
+    }
+
     async loadCategories() {
         try {
             const response = await fetch(`${CONFIG.API_URL}/categories`);
@@ -79,8 +97,13 @@ class BMSBank {
         if (this.loading) return;
         this.loading = true;
 
+        // Show skeleton on first load
+        if (this.isFirstLoad) {
+            document.getElementById('skeletonGrid').style.display = 'grid';
+            document.getElementById('resourcesContainer').querySelector('.resources-grid')?.remove();
+        }
+
         try {
-            // CHANGED: Increased limit from 15 to 50
             let url = `${CONFIG.API_URL}/resources?limit=50&page=${this.page}`;
             if (this.currentWeek !== 'all') url += `&week=${this.currentWeek}`;
             if (this.currentCategory !== 'all') url += `&category=${this.currentCategory}`;
@@ -97,6 +120,11 @@ class BMSBank {
             
             this.hasMore = data.length === 50;
             this.totalResources = this.resources.length;
+            this.isFirstLoad = false;
+            
+            // Hide skeleton
+            document.getElementById('skeletonGrid').style.display = 'none';
+            
             this.renderResources();
             this.updateStats();
             this.updateProgressBar();
@@ -104,6 +132,7 @@ class BMSBank {
             document.getElementById('loadMoreContainer').style.display = this.hasMore ? 'block' : 'none';
         } catch (error) {
             console.error('Error loading resources:', error);
+            document.getElementById('skeletonGrid').style.display = 'none';
             this.showError('Failed to load resources. Please refresh and try again.');
         } finally {
             this.loading = false;
@@ -113,15 +142,19 @@ class BMSBank {
     renderResources() {
         const container = document.getElementById('resourcesContainer');
         
+        // Remove old grid if exists
+        const oldGrid = container.querySelector('.resources-grid');
+        if (oldGrid) oldGrid.remove();
+        
         if (!this.resources || this.resources.length === 0) {
             container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">
+                <div class="empty-state" style="text-align:center;padding:4rem 1rem;">
+                    <div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">
                         <i class="fas fa-inbox"></i>
                     </div>
-                    <h3>No resources found</h3>
-                    <p>Try adjusting your search or filters</p>
-                    <button class="btn-premium" onclick="location.reload()">
+                    <h3 style="font-size:1.2rem;margin-bottom:0.25rem;color:var(--text);">No resources found</h3>
+                    <p style="color:var(--text-muted);margin-bottom:1rem;">Try adjusting your search or filters</p>
+                    <button class="btn-load-more glass" onclick="location.reload()">
                         <i class="fas fa-sync"></i> Refresh
                     </button>
                 </div>
@@ -147,28 +180,33 @@ class BMSBank {
 
         const cards = sorted.map((resource, index) => this.createResourceCard(resource, index)).join('');
         
-        container.innerHTML = `
-            <div class="resources-header">
-                <span class="result-count">${this.resources.length} resources found</span>
-            </div>
-            <div class="resources-grid">
-                ${cards}
-            </div>
-        `;
+        // Remove skeleton and add content
+        const skeleton = container.querySelector('#skeletonGrid');
+        if (skeleton) skeleton.style.display = 'none';
+        
+        const grid = document.createElement('div');
+        grid.className = 'resources-grid';
+        grid.innerHTML = cards;
+        
+        // Add header
+        const header = document.createElement('div');
+        header.className = 'resources-header';
+        header.innerHTML = `<span class="result-count">${this.resources.length} resources found</span>`;
+        
+        container.innerHTML = '';
+        container.appendChild(header);
+        container.appendChild(grid);
 
-        // ANIMATED: Staggered card entrance
-        document.querySelectorAll('.resource-card').forEach((card, i) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px) scale(0.95)';
+        // Animate cards with stagger
+        const cardsEl = grid.querySelectorAll('.resource-card');
+        cardsEl.forEach((card, i) => {
             setTimeout(() => {
-                card.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0) scale(1)';
-            }, 80 * i);
+                card.classList.add('visible');
+            }, 60 * i);
         });
 
-        // ANIMATED: Result count update
-        const count = document.querySelector('.result-count');
+        // Animate result count
+        const count = container.querySelector('.result-count');
         if (count) {
             count.classList.add('update');
             setTimeout(() => count.classList.remove('update'), 300);
@@ -184,11 +222,10 @@ class BMSBank {
             year: 'numeric'
         }) : 'Unknown';
         
-        // Determine file type for icon
         let fileIcon = 'fa-file';
         let fileColor = '#ef4444';
         let fileType = 'File';
-        let downloadText = '📥 Download';
+        let downloadText = 'Download';
         
         if (resource.file_url) {
             const ext = resource.file_url.split('.').pop().toLowerCase();
@@ -196,44 +233,42 @@ class BMSBank {
                 fileIcon = 'fa-file-pdf';
                 fileColor = '#ef4444';
                 fileType = 'PDF';
-                downloadText = '📥 Download PDF';
+                downloadText = 'Download PDF';
             } else if (['ppt', 'pptx'].includes(ext)) {
                 fileIcon = 'fa-file-powerpoint';
                 fileColor = '#f59e0b';
                 fileType = 'PPT';
-                downloadText = '📥 Download PPT';
+                downloadText = 'Download PPT';
             } else if (['doc', 'docx'].includes(ext)) {
                 fileIcon = 'fa-file-word';
                 fileColor = '#3b82f6';
                 fileType = 'DOC';
-                downloadText = '📥 Download DOC';
+                downloadText = 'Download DOC';
             } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
                 fileIcon = 'fa-file-image';
                 fileColor = '#8b5cf6';
                 fileType = 'Image';
-                downloadText = '📥 Download Image';
+                downloadText = 'Download Image';
             } else if (['mp4', 'avi', 'mov', 'mkv'].includes(ext)) {
                 fileIcon = 'fa-file-video';
                 fileColor = '#ec4899';
                 fileType = 'Video';
-                downloadText = '📥 Download Video';
+                downloadText = 'Download Video';
             } else if (['zip', 'rar', '7z'].includes(ext)) {
                 fileIcon = 'fa-file-archive';
                 fileColor = '#f59e0b';
                 fileType = 'Archive';
-                downloadText = '📥 Download Archive';
+                downloadText = 'Download Archive';
             } else {
                 fileIcon = 'fa-file';
                 fileColor = '#6b7280';
                 fileType = 'File';
-                downloadText = '📥 Download File';
+                downloadText = 'Download File';
             }
         }
         
-        // BIG OBVIOUS DOWNLOAD BUTTON with fl_attachment=1 for force download
         let linkHtml = '';
         if (resource.file_url) {
-            // NEW: Add fl_attachment=1 to force download
             const downloadUrl = resource.file_url.includes('?') 
                 ? resource.file_url + '&fl_attachment=1' 
                 : resource.file_url + '?fl_attachment=1';
@@ -242,7 +277,7 @@ class BMSBank {
                 <a href="${downloadUrl}" target="_blank" class="download-btn" style="background: ${fileColor}; color: white;" onclick="window.bmsBank.markDownloaded('${resource.id}')">
                     <i class="fas ${fileIcon}"></i>
                     ${downloadText}
-                    <i class="fas fa-arrow-down" style="margin-left: 4px;"></i>
+                    <i class="fas fa-arrow-down" style="font-size:0.7rem;"></i>
                 </a>
             `;
         } else if (resource.google_drive_link) {
@@ -250,17 +285,17 @@ class BMSBank {
                 <a href="${resource.google_drive_link}" target="_blank" class="download-btn" style="background: #4285f4; color: white;">
                     <i class="fab fa-google-drive"></i>
                     Open in Drive
-                    <i class="fas fa-external-link-alt" style="margin-left: 4px; font-size: 0.7rem;"></i>
+                    <i class="fas fa-external-link-alt" style="font-size:0.7rem;"></i>
                 </a>
             `;
         }
 
         return `
-            <div class="resource-card" data-index="${index}" data-id="${resource.id}">
+            <div class="resource-card" data-id="${resource.id}">
                 <div class="resource-card-badge">
-                    <span class="week-badge">📅 Week ${resource.week_number || 'N/A'}</span>
-                    ${resource.file_url ? `<span class="file-type-badge" style="background: ${fileColor}22; color: ${fileColor}; border: 1px solid ${fileColor}44;"><i class="fas ${fileIcon}"></i> ${fileType}</span>` : ''}
-                    ${this.isDownloaded(resource.id) ? `<span class="downloaded-badge">✅ Downloaded</span>` : ''}
+                    <span class="week-badge"><i class="fas fa-calendar-week"></i> Week ${resource.week_number || 'N/A'}</span>
+                    ${resource.file_url ? `<span class="file-type-badge" style="background: ${fileColor}22; color: ${fileColor}; border-color: ${fileColor}44;"><i class="fas ${fileIcon}"></i> ${fileType}</span>` : ''}
+                    ${this.isDownloaded(resource.id) ? `<span class="downloaded-badge">✓ Downloaded</span>` : ''}
                 </div>
                 <div class="resource-card-header">
                     <h3 class="resource-card-title">${this.escapeHtml(resource.title || 'Untitled')}</h3>
@@ -312,7 +347,7 @@ class BMSBank {
         if (!ids.includes(resourceId)) {
             ids.push(resourceId);
             localStorage.setItem('bms-downloaded-ids', JSON.stringify(ids));
-            // Update the badge without refreshing
+            
             const card = document.querySelector(`.resource-card[data-id="${resourceId}"]`);
             if (card) {
                 const badge = card.querySelector('.downloaded-badge');
@@ -320,11 +355,12 @@ class BMSBank {
                     const badgeContainer = card.querySelector('.resource-card-badge');
                     const span = document.createElement('span');
                     span.className = 'downloaded-badge';
-                    span.textContent = '✅ Downloaded';
+                    span.textContent = '✓ Downloaded';
                     badgeContainer.appendChild(span);
                 }
             }
             this.updateProgressBar();
+            this.showToast('✅ Resource downloaded!', 'success');
         }
     }
 
@@ -362,8 +398,8 @@ class BMSBank {
         document.getElementById('weekFilter').value = week;
         this.updateWeekButtons();
         this.page = 1;
+        this.isFirstLoad = true;
         this.loadResources();
-        // Smooth scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -377,7 +413,6 @@ class BMSBank {
             return;
         }
         
-        // Count files with URLs
         const downloadable = resources.filter(r => r.file_url);
         if (downloadable.length === 0) {
             this.showToast('No downloadable files found', 'error');
@@ -386,7 +421,6 @@ class BMSBank {
         
         this.showToast(`📦 Preparing ${downloadable.length} files...`, 'info');
         
-        // Download each file with a delay to avoid browser blocking
         downloadable.forEach((r, index) => {
             setTimeout(() => {
                 const downloadUrl = r.file_url.includes('?') 
@@ -415,31 +449,45 @@ class BMSBank {
     setupEventListeners() {
         let searchTimeout;
         const searchInput = document.getElementById('searchInput');
+        const heroSearch = document.getElementById('heroSearch');
         
+        const handleSearch = (value) => {
+            clearTimeout(searchTimeout);
+            const val = value.trim();
+            document.getElementById('searchClear').style.display = val ? 'flex' : 'none';
+            searchTimeout = setTimeout(() => {
+                this.currentSearch = val;
+                this.page = 1;
+                this.isFirstLoad = true;
+                this.loadResources();
+            }, 400);
+        };
+
         if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                const value = e.target.value.trim();
-                document.getElementById('searchClear').style.display = value ? 'flex' : 'none';
-                searchTimeout = setTimeout(() => {
-                    this.currentSearch = value;
-                    this.page = 1;
-                    this.loadResources();
-                }, 400);
+            searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+        }
+
+        if (heroSearch) {
+            heroSearch.addEventListener('input', (e) => {
+                handleSearch(e.target.value);
+                if (searchInput) searchInput.value = e.target.value;
             });
         }
 
         document.getElementById('searchClear').addEventListener('click', () => {
-            document.getElementById('searchInput').value = '';
+            if (searchInput) searchInput.value = '';
+            if (heroSearch) heroSearch.value = '';
             document.getElementById('searchClear').style.display = 'none';
             this.currentSearch = '';
             this.page = 1;
+            this.isFirstLoad = true;
             this.loadResources();
         });
 
         document.getElementById('categoryFilter').addEventListener('change', (e) => {
             this.currentCategory = e.target.value;
             this.page = 1;
+            this.isFirstLoad = true;
             this.loadResources();
         });
 
@@ -447,6 +495,7 @@ class BMSBank {
             this.currentWeek = e.target.value;
             this.updateWeekButtons();
             this.page = 1;
+            this.isFirstLoad = true;
             this.loadResources();
         });
 
@@ -460,10 +509,30 @@ class BMSBank {
             this.loadResources(true);
         });
 
-        // Download All button
         const downloadAllBtn = document.getElementById('downloadAllBtn');
         if (downloadAllBtn) {
             downloadAllBtn.addEventListener('click', () => this.downloadAllResources());
+        }
+
+        // Hero search button
+        const heroSearchBtn = document.getElementById('heroSearchBtn');
+        if (heroSearchBtn && heroSearch) {
+            heroSearchBtn.addEventListener('click', () => {
+                const val = heroSearch.value.trim();
+                if (val) {
+                    if (searchInput) searchInput.value = val;
+                    this.currentSearch = val;
+                    this.page = 1;
+                    this.isFirstLoad = true;
+                    this.loadResources();
+                }
+            });
+            heroSearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    heroSearchBtn.click();
+                }
+            });
         }
 
         // ============================================
@@ -495,12 +564,12 @@ class BMSBank {
             
             adminDot.addEventListener('mouseenter', () => {
                 adminDot.style.transition = 'all 0.3s ease';
-                adminDot.style.color = '#f59e0b';
-                adminDot.style.textShadow = '0 0 20px rgba(245, 158, 11, 0.3)';
+                adminDot.style.color = 'var(--secondary)';
+                adminDot.style.textShadow = '0 0 30px rgba(201, 168, 76, 0.2)';
             });
             
             adminDot.addEventListener('mouseleave', () => {
-                adminDot.style.color = 'rgba(255,255,255,0.2)';
+                adminDot.style.color = 'rgba(255,255,255,0.1)';
                 adminDot.style.textShadow = 'none';
             });
         }
@@ -530,7 +599,9 @@ class BMSBank {
                 document.getElementById('weekFilter').value = week;
                 this.updateWeekButtons();
                 this.page = 1;
+                this.isFirstLoad = true;
                 this.loadResources();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
             nav.appendChild(btn);
         }
@@ -553,8 +624,8 @@ class BMSBank {
         
         const icon = toggle.querySelector('i');
         const savedTheme = localStorage.getItem('bms-theme');
-        if (savedTheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
             if (icon) icon.className = 'fas fa-sun';
         }
 
@@ -574,11 +645,13 @@ class BMSBank {
             // Ctrl+K or Cmd+K → Focus search
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
-                document.getElementById('searchInput').focus();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.focus();
             }
             // Escape → Clear search
             if (e.key === 'Escape') {
-                document.getElementById('searchInput').blur();
+                document.getElementById('searchInput')?.blur();
+                document.getElementById('heroSearch')?.blur();
             }
             // Ctrl+1 to Ctrl+9 → Go to Week 1-9
             if (e.ctrlKey && !e.shiftKey) {
@@ -616,13 +689,13 @@ class BMSBank {
         const container = document.getElementById('resourcesContainer');
         if (container) {
             container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">
+                <div class="empty-state" style="text-align:center;padding:4rem 1rem;">
+                    <div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <h3>Oops!</h3>
-                    <p>${message}</p>
-                    <button class="btn-premium" onclick="location.reload()">
+                    <h3 style="font-size:1.2rem;margin-bottom:0.25rem;color:var(--text);">Oops!</h3>
+                    <p style="color:var(--text-muted);margin-bottom:1rem;">${message}</p>
+                    <button class="btn-load-more glass" onclick="location.reload()">
                         <i class="fas fa-sync"></i> Refresh
                     </button>
                 </div>
