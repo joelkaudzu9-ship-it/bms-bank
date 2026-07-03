@@ -2269,3 +2269,112 @@ body {
         font-size: 0.75rem;
     }
 }
+
+/* ============================================
+   TRACKER STATS BAR
+   ============================================ */
+.tracker-stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tracker-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.tracker-stat-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.tracker-stat-value .fa-download {
+    color: var(--secondary);
+}
+
+.tracker-stat-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.tracker-stat-divider {
+    width: 1px;
+    height: 30px;
+    background: var(--border);
+}
+
+.download-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-full);
+    padding: 0.05rem 0.5rem;
+    font-size: 0.65rem;
+    margin-left: 0.3rem;
+    font-weight: 700;
+}
+
+/* Download History */
+.download-history {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+}
+
+.download-history-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.download-entry {
+    display: inline-block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.1rem 0.5rem;
+    border-radius: var(--radius-full);
+    margin: 0.15rem;
+}
+
+.download-entry i {
+    margin-right: 0.2rem;
+    font-size: 0.55rem;
+}
+
+@media (max-width: 768px) {
+    .tracker-stats-bar {
+        gap: 0.75rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .tracker-stat-value {
+        font-size: 1rem;
+    }
+    
+    .tracker-stat-divider {
+        height: 24px;
+    }
+}
