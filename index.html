@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>BMS BANK - MBBS & BDS Resource Bank</title>
+    <title>BMS BANK - MBBS,BDS & BND Resource Bank</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="shortcut icon" href="assets/logo.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -33,7 +33,7 @@
                     <img src="assets/logo.png" alt="KUHeS" class="logo" onerror="this.style.display='none'">
                     <div class="brand-text">
                         <h1>BMS <span>BANK</span></h1>
-                        <span class="subtitle">MBBS & BDS · Semester 1</span>
+                        <span class="subtitle">MBBS,BDS & BND · Semester 1</span>
                     </div>
                 </div>
             </div>
@@ -99,6 +99,21 @@
                 <span class="stat-value">19</span>
                 <span class="stat-label">Weeks</span>
             </div>
+        </div>
+
+        <!-- Progress Bar - NEW -->
+        <div class="progress-container">
+            <span>📊 Study Progress</span>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <span class="progress-text" id="progressText">0/0 downloaded (0%)</span>
+            <button class="btn-download-all" id="downloadAllBtn">📥 Download All</button>
+        </div>
+
+        <!-- Quick Access - NEW -->
+        <div class="quick-access" id="quickAccess">
+            <span style="font-weight:600;font-size:0.8rem;color:var(--text-light);">⚡ Quick Access:</span>
         </div>
 
         <!-- Search & Filters -->
@@ -168,13 +183,18 @@
                 <!-- Hidden Admin Trigger - A tiny dot that opens admin on double click -->
                 <span class="admin-trigger-dot" id="adminTriggerDot" title="Admin Access (Double Click)">•</span>
             </div>
-            <p>© 2026 · Built with <i class="fas fa-heart" style="color: #ef4444;"></i> for MBBS & BDS Students</p>
+            <p>© NEURO~2026 </i> for MBBS,BDS & BND Students</p>
             <p class="footer-credit">Kamuzu University of Health Sciences · Malawi</p>
         </div>
     </footer>
 
     <!-- Toast Container -->
     <div id="toastContainer"></div>
+
+    <!-- Keyboard Shortcuts Hint - NEW -->
+    <div class="keyboard-hint">
+        <span> Shortcuts: <kbd>Ctrl+K</kbd> Search · <kbd>Ctrl+1-9</kbd> Weeks · <kbd>Ctrl+D</kbd> Download All</span>
+    </div>
 
     <script src="js/config.js"></script>
     <script src="js/app.js"></script>

@@ -1,0 +1,136 @@
+================================================================================
+FILES LARGER THAN 10MB
+================================================================================
+Total files found: 54
+================================================================================
+
+#    File                                               Size       Category        Folder         
+--------------------------------------------------------------------------------
+1    Dee Unglaub Silverthorn - Human Physiology_ An     137.0 MB  SEM 2           Textbooks      
+2    4.Axilla by Tembo.pptx                             110.5 MB  Half 2          Anatomy        
+3    Basic & Clinical Pharmacology, 14th Edition-1.p    71.6 MB  SEM 2           Textbooks      
+4    6.HISTOLOGY OF THE HEART.ppt                       71.3 MB  Anatomy         1st half       
+5    6.f. Primary tissue 3 Muscle tissue.pptx           53.0 MB  Half 1          Anatomy        
+6    1b. Development-week one of life.ppt               46.4 MB  Half 2          Anatomy        
+7    6.g. Primary Tissue 4 - Neural Tissue.pptx         45.4 MB  Half 1          Anatomy        
+8    MUSCLE Tissue Histology-MBBS 1.pdf                 41.5 MB  Half 2          Anatomy        
+9    6.a. Primary tissue 1. Epithelial Tissue and Gl    39.2 MB  Half 1          Anatomy        
+10   15 Hypertension.pptx                               36.6 MB  Physiology      half 1         
+11   2.Cell organelles and intramembrane system.ppt     36.0 MB  Half 1          Anatomy        
+12   CVS exam KUHeS.pptx                                35.6 MB  SEM 2           Clinical Skill 
+13   2.1 ANTI-ASTHMATICS.pptx                           31.7 MB  Pharmacology    Half 2         
+14   6.c. Primary tissue 2, Connective tissue Proper    31.4 MB  Half 1          Anatomy        
+15   Introduction to Medical Ethics audio.pptx          29.4 MB  Half 1          Public Health  
+16   Development of the Heart.ppt                       28.8 MB  Anatomy         1st half       
+17   7.a. Review of major body systems - Lymphoretic    28.6 MB  Half 1          Anatomy        
+18   8.Neuromuscular Juction.pptx                       28.3 MB  Half 2          Physiology     
+19   7.Excitation Conraction Coupling.pptx              23.7 MB  Half 2          Physiology     
+20   13.Back Muscles.pptx                               22.3 MB  Half 2          Anatomy        
+21   1.Vaccination_immunisation1_025917.pptx            20.7 MB  Microbiology    Half 1         
+22   5.Axilla – Brachial Plexus.pptx                    20.6 MB  Half 2          Anatomy        
+23   3.Heart_diseases.updated_ppt.ppt                   20.4 MB  Pathology       Half 1         
+24   4.The Cytoskeleton.ppt                             18.8 MB  Half 1          Anatomy        
+25   3.Coronary Circulation.ppt                         18.8 MB  Anatomy         1st half       
+26   1. Neoplasia and carcinogens.pptx                  18.7 MB  Half 2          Pathology      
+27   2.THE BREAST AND PECTORAL REGION.ppt               18.7 MB  Half 2          Anatomy        
+28   8 muscle diseases.ppt                              18.2 MB  Half 2          Pathology      
+29   2.ANTIARRHYTHMIC DRUGS.pptx                        17.9 MB  Pharmacology    Half 1         
+30   8.h. introduction to Nervous system.pptx           17.7 MB  Half 1          Anatomy        
+31   1.MICROBIAL_GENETICS_2023.pptx                     16.9 MB  Half 2          Microbiology   
+32   7.d. Review of musculoskeletal sys- muscle and     16.8 MB  Half 1          Anatomy        
+33   7.e. Review of musculoskeletal sys- muscle and     16.8 MB  Half 1          Anatomy        
+34   5.HEMODYNAMICS_032246.pptx                         15.9 MB  Physiology      half 1         
+35   3.Graded And Action Potential.pptx                 15.8 MB  Half 2          Physiology     
+36   1.Structure of neurons.pptx                        14.4 MB  Half 2          Physiology     
+37   10.REGULATION OF ARTERIAL BP.pptx                  14.2 MB  Physiology      half 1         
+38   8.Anterior and Posterior Forearm.pptx              13.9 MB  Half 2          Anatomy        
+39   1.Lymphoma-MBBS1 Feb15.ppt                         13.7 MB  Pathology       Half 1         
+40   12.Back Osteology.pptx                             13.0 MB  Half 2          Anatomy        
+41   17 Thigh anterior and medial.ppt                   12.9 MB  Half 2          Anatomy        
+42   3.SHOULDER REGION AND SHOULDER JOINT.ppt           12.5 MB  Half 2          Anatomy        
+43   Respiratory Infections.ppt                         12.4 MB  Pathology       Half 2         
+44   9.The autonomic nervous system.pptx                12.3 MB  Half 2          Physiology     
+45   3.Hist-Intro_BCHD_J. Manda-1.ppt                   11.8 MB  Half 1          Anatomy        
+46   Pharm 1 & MBBS 2 Professionalism (Ethics).2.ppt    11.7 MB  Half 1          Public Health  
+47   6.AUTOREGULATION OF BLOOD FLOW.pptx                11.5 MB  Physiology      half 1         
+48   Development of the arortic arches.pptx             11.5 MB  Anatomy         1st half       
+49   4.General Concepts Innate and Adaptive Immunity    11.4 MB  Microbiology    Half 1         
+50   2.GROSS FEATURES OF PERICARDIUM, HEART AND GREA    11.0 MB  Anatomy         1st half       
+51   4.Electrocardiograph and Stroke Rate_032618.ppt    10.9 MB  Physiology      half 1         
+52   9.The hand.pptx                                    10.4 MB  Half 2          Anatomy        
+53   5.Neurotransmitters and neuromodulators.pptx       10.2 MB  Half 2          Physiology     
+54   6.Muscle types.pptx                                10.1 MB  Half 2          Physiology     
+
+================================================================================
+BREAKDOWN BY CATEGORY
+================================================================================
+
+Anatomy (5 files, 141.4 MB):
+  - 6.HISTOLOGY OF THE HEART.ppt (71.3 MB)
+  - Development of the Heart.ppt (28.8 MB)
+  - 3.Coronary Circulation.ppt (18.8 MB)
+  - Development of the arortic arches.pptx (11.5 MB)
+  - 2.GROSS FEATURES OF PERICARDIUM, HEART AND GREAT VESSELS (1).ppt (11.0 MB)
+
+Half 1 (13 files, 356.7 MB):
+  - 6.f. Primary tissue 3 Muscle tissue.pptx (53.0 MB)
+  - 6.g. Primary Tissue 4 - Neural Tissue.pptx (45.4 MB)
+  - 6.a. Primary tissue 1. Epithelial Tissue and Glands.ppt (39.2 MB)
+  - 2.Cell organelles and intramembrane system.ppt (36.0 MB)
+  - 6.c. Primary tissue 2, Connective tissue Proper, , Cartilage and Bone  2023.ppt (31.4 MB)
+  - Introduction to Medical Ethics audio.pptx (29.4 MB)
+  - 7.a. Review of major body systems - Lymphoreticular.pptx (28.6 MB)
+  - 4.The Cytoskeleton.ppt (18.8 MB)
+  - 8.h. introduction to Nervous system.pptx (17.7 MB)
+  - 7.d. Review of musculoskeletal sys- muscle and bones, joints and their classification.ppt (16.8 MB)
+  - 7.e. Review of musculoskeletal sys- muscle and bones, joints and their classification.ppt (16.8 MB)
+  - 3.Hist-Intro_BCHD_J. Manda-1.ppt (11.8 MB)
+  - Pharm 1 & MBBS 2 Professionalism (Ethics).2.pptx (11.7 MB)
+
+Half 2 (21 files, 491.4 MB):
+  - 4.Axilla by Tembo.pptx (110.5 MB)
+  - 1b. Development-week one of life.ppt (46.4 MB)
+  - MUSCLE Tissue Histology-MBBS 1.pdf (41.5 MB)
+  - 8.Neuromuscular Juction.pptx (28.3 MB)
+  - 7.Excitation Conraction Coupling.pptx (23.7 MB)
+  - 13.Back Muscles.pptx (22.3 MB)
+  - 5.Axilla – Brachial Plexus.pptx (20.6 MB)
+  - 1. Neoplasia and carcinogens.pptx (18.7 MB)
+  - 2.THE BREAST AND PECTORAL REGION.ppt (18.7 MB)
+  - 8 muscle diseases.ppt (18.2 MB)
+  - 1.MICROBIAL_GENETICS_2023.pptx (16.9 MB)
+  - 3.Graded And Action Potential.pptx (15.8 MB)
+  - 1.Structure of neurons.pptx (14.4 MB)
+  - 8.Anterior and Posterior Forearm.pptx (13.9 MB)
+  - 12.Back Osteology.pptx (13.0 MB)
+  - 17 Thigh anterior and medial.ppt (12.9 MB)
+  - 3.SHOULDER REGION AND SHOULDER JOINT.ppt (12.5 MB)
+  - 9.The autonomic nervous system.pptx (12.3 MB)
+  - 9.The hand.pptx (10.4 MB)
+  - 5.Neurotransmitters and neuromodulators.pptx (10.2 MB)
+  - 6.Muscle types.pptx (10.1 MB)
+
+Microbiology (2 files, 32.1 MB):
+  - 1.Vaccination_immunisation1_025917.pptx (20.7 MB)
+  - 4.General Concepts Innate and Adaptive Immunity_MBBS1_29.08.2023 TN ver Final.pptx (11.4 MB)
+
+Pathology (3 files, 46.5 MB):
+  - 3.Heart_diseases.updated_ppt.ppt (20.4 MB)
+  - 1.Lymphoma-MBBS1 Feb15.ppt (13.7 MB)
+  - Respiratory Infections.ppt (12.4 MB)
+
+Pharmacology (2 files, 49.6 MB):
+  - 2.1 ANTI-ASTHMATICS.pptx (31.7 MB)
+  - 2.ANTIARRHYTHMIC DRUGS.pptx (17.9 MB)
+
+Physiology (5 files, 89.0 MB):
+  - 15 Hypertension.pptx (36.6 MB)
+  - 5.HEMODYNAMICS_032246.pptx (15.9 MB)
+  - 10.REGULATION OF ARTERIAL BP.pptx (14.2 MB)
+  - 6.AUTOREGULATION OF BLOOD FLOW.pptx (11.5 MB)
+  - 4.Electrocardiograph and Stroke Rate_032618.pptx (10.9 MB)
+
+SEM 2 (3 files, 244.2 MB):
+  - Dee Unglaub Silverthorn - Human Physiology_ An Integrated Approach-Benjamin Cummings (2009).pdf (137.0 MB)
+  - Basic & Clinical Pharmacology, 14th Edition-1.pdf (71.6 MB)
+  - CVS exam KUHeS.pptx (35.6 MB)
