@@ -74,6 +74,22 @@ class BMSBank {
     }
 
     // ============================================
+    // SCROLL TO RESOURCES
+    // ============================================
+    scrollToResources() {
+        const container = document.getElementById('resourcesContainer');
+        if (container) {
+            const headerOffset = 80;
+            const elementPosition = container.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    // ============================================
     // DOWNLOAD STATS
     // ============================================
     updateDownloadStats() {
@@ -113,19 +129,26 @@ class BMSBank {
     }
 
     // ============================================
-    // DOWNLOAD TRACKER PDF
+    // DOWNLOAD TRACKER PDF - FIXED (Direct Print)
     // ============================================
     downloadTrackerPDF() {
         // Track the download
         this.trackDownload();
         
-        // Open the PDF from assets folder
-        window.open(this.trackerPDFUrl, '_blank');
-        this.showToast('📄 Opening Accountability Tracker PDF...', 'info');
+        // Open PDF in new tab for printing
+        const printWindow = window.open(this.trackerPDFUrl, '_blank');
+        if (printWindow) {
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.print();
+                }, 1000);
+            };
+        }
+        this.showToast('📄 Opening PDF for printing...', 'info');
     }
 
     // ============================================
-    // TRACKER TOGGLE
+    // TRACKER TOGGLE - FIXED (Auto-scroll)
     // ============================================
     setupTrackerToggle() {
         const toggleBtn = document.getElementById('trackerToggle');
@@ -152,6 +175,9 @@ class BMSBank {
         } else {
             this.renderResources();
         }
+        
+        // Auto-scroll to resources/tracker
+        setTimeout(() => this.scrollToResources(), 300);
     }
 
     // ============================================
@@ -220,11 +246,11 @@ class BMSBank {
                     <span class="week-date">${weekDate}</span>
                 </div>
                 <div class="tracker-header-actions">
-                    <button class="btn-premium" onclick="window.bmsBank.downloadTrackerPDF()">
+                    <button class="btn-premium btn-tracker-download" onclick="window.bmsBank.downloadTrackerPDF()">
                         <i class="fas fa-file-pdf"></i> Download PDF
                         <span class="download-badge" id="trackerDownloadCount">${stats.count}</span>
                     </button>
-                    <button class="btn-premium-outline" onclick="window.bmsBank.resetTracker(${week})">
+                    <button class="btn-premium-outline btn-tracker-reset" onclick="window.bmsBank.resetTracker(${week})">
                         <i class="fas fa-undo"></i> Reset
                     </button>
                 </div>
@@ -473,7 +499,7 @@ class BMSBank {
     }
 
     // ============================================
-    // RESOURCES
+    // RESOURCES - FIXED (Show all, not just 49)
     // ============================================
     async loadResources(append = false) {
         if (this.loading) return;
@@ -487,7 +513,8 @@ class BMSBank {
         }
 
         try {
-            let url = `${CONFIG.API_URL}/resources?limit=50&page=${this.page}`;
+            // FIXED: Increased limit to 200 to show all resources
+            let url = `${CONFIG.API_URL}/resources?limit=200&page=${this.page}`;
             
             if (this.currentWeek !== 'all' && this.currentWeek !== '') {
                 url += `&week=${this.currentWeek}`;
@@ -514,7 +541,8 @@ class BMSBank {
                 this.resources = data;
             }
             
-            this.hasMore = data.length === 50;
+            // FIXED: Show all resources, don't hide based on limit
+            this.hasMore = false;
             this.totalResources = this.resources.length;
             this.isFirstLoad = false;
             
@@ -532,7 +560,7 @@ class BMSBank {
             
             const loadMore = document.getElementById('loadMoreContainer');
             if (loadMore) {
-                loadMore.style.display = this.hasMore ? 'block' : 'none';
+                loadMore.style.display = 'none';
             }
         } catch (error) {
             console.error('Error loading resources:', error);
@@ -869,17 +897,7 @@ class BMSBank {
         }
         
         this.loadResources();
-        
-        const resourcesContainer = document.getElementById('resourcesContainer');
-        if (resourcesContainer) {
-            const headerOffset = 80;
-            const elementPosition = resourcesContainer.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
-            });
-        }
+        this.scrollToResources();
     }
 
     // ============================================
@@ -929,7 +947,7 @@ class BMSBank {
     }
 
     // ============================================
-    // EVENT LISTENERS
+    // EVENT LISTENERS - FIXED (Search scroll)
     // ============================================
     setupEventListeners() {
         let searchTimeout;
@@ -964,6 +982,8 @@ class BMSBank {
                 this.page = 1;
                 this.isFirstLoad = true;
                 this.loadResources();
+                // FIXED: Scroll to resources after search
+                this.scrollToResources();
                 console.log('🔍 Searching for:', this.currentSearch);
             }, 400);
         };
@@ -980,6 +1000,7 @@ class BMSBank {
                     this.isFirstLoad = true;
                     this.loadResources();
                     if (heroSearch) heroSearch.value = value;
+                    this.scrollToResources();
                     console.log('🔍 Enter search:', this.currentSearch);
                 }
             });
@@ -997,6 +1018,7 @@ class BMSBank {
                     this.isFirstLoad = true;
                     this.loadResources();
                     if (searchInput) searchInput.value = value;
+                    this.scrollToResources();
                     console.log('🔍 Hero Enter search:', this.currentSearch);
                 }
             });
@@ -1015,6 +1037,7 @@ class BMSBank {
                     this.page = 1;
                     this.isFirstLoad = true;
                     this.loadResources();
+                    this.scrollToResources();
                 } else {
                     if (searchInput) searchInput.value = '';
                     if (heroSearch) heroSearch.value = '';
@@ -1022,6 +1045,7 @@ class BMSBank {
                     this.page = 1;
                     this.isFirstLoad = true;
                     this.loadResources();
+                    this.scrollToResources();
                     this.showToast('Please enter a search term', 'info');
                 }
             });
@@ -1037,6 +1061,7 @@ class BMSBank {
                 this.page = 1;
                 this.isFirstLoad = true;
                 this.loadResources();
+                this.scrollToResources();
                 console.log('🧹 Search cleared');
             });
         }
@@ -1048,6 +1073,7 @@ class BMSBank {
                 this.page = 1;
                 this.isFirstLoad = true;
                 this.loadResources();
+                this.scrollToResources();
                 console.log('📂 Category filter:', this.currentCategory);
             });
         }
@@ -1060,6 +1086,7 @@ class BMSBank {
                 this.page = 1;
                 this.isFirstLoad = true;
                 this.loadResources();
+                this.scrollToResources();
                 console.log('📅 Week filter:', this.currentWeek);
             });
         }
@@ -1134,7 +1161,7 @@ class BMSBank {
     }
 
     // ============================================
-    // WEEK NAVIGATION
+    // WEEK NAVIGATION - FIXED (All Weeks shows all)
     // ============================================
     setupWeekNavigation() {
         const nav = document.getElementById('weekNav');
@@ -1161,20 +1188,34 @@ class BMSBank {
                 }
                 
                 this.loadResources();
+                this.scrollToResources();
                 console.log('📅 Week nav clicked:', week);
-                
-                const resourcesContainer = document.getElementById('resourcesContainer');
-                if (resourcesContainer) {
-                    const headerOffset = 80;
-                    const elementPosition = resourcesContainer.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
             });
             nav.appendChild(btn);
+        }
+        
+        // FIXED: Make sure "All Weeks" button works
+        const allBtn = document.querySelector('.week-btn[data-week="all"]');
+        if (allBtn) {
+            allBtn.addEventListener('click', () => {
+                this.currentWeek = 'all';
+                document.getElementById('weekFilter').value = 'all';
+                this.updateWeekButtons();
+                this.page = 1;
+                this.isFirstLoad = true;
+                this.showTracker = false;
+                
+                const toggleBtn = document.getElementById('trackerToggle');
+                if (toggleBtn) {
+                    toggleBtn.classList.remove('active');
+                    toggleBtn.innerHTML = '<i class="fas fa-check-double"></i>';
+                    toggleBtn.title = 'Study Tracker';
+                }
+                
+                this.loadResources();
+                this.scrollToResources();
+                console.log('📅 All Weeks clicked');
+            });
         }
     }
 
