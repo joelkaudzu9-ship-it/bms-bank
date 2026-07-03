@@ -13,6 +13,29 @@ class BMSBank {
         this.totalResources = 0;
         this.isFirstLoad = true;
         
+        // Week date mapping
+        this.WEEK_DATES = {
+            1: "15-19 June 2026",
+            2: "22-26 June 2026",
+            3: "29 June - 3 July 2026",
+            4: "6-10 July 2026",
+            5: "13-17 July 2026",
+            6: "20-24 July 2026",
+            7: "27-31 July 2026",
+            8: "3-7 August 2026",
+            9: "10-14 August 2026",
+            10: "17-23 August 2026",
+            11: "24-28 August 2026",
+            12: "31 August - 4 September 2026",
+            13: "7-11 September 2026",
+            14: "14-18 September 2026",
+            15: "21-25 September 2026",
+            16: "28 September - 2 October 2026",
+            17: "5-9 October 2026",
+            18: "12-16 October 2026",
+            19: "19-23 October 2026",
+        };
+        
         this.init();
     }
 
@@ -222,6 +245,9 @@ class BMSBank {
             year: 'numeric'
         }) : 'Unknown';
         
+        // Get week date from mapping
+        const weekDate = this.WEEK_DATES[resource.week_number] || '';
+        
         let fileIcon = 'fa-file';
         let fileColor = '#ef4444';
         let fileType = 'File';
@@ -269,17 +295,45 @@ class BMSBank {
         
         let linkHtml = '';
         if (resource.file_url) {
-            const downloadUrl = resource.file_url.includes('?') 
-                ? resource.file_url + '&fl_attachment=1' 
-                : resource.file_url + '?fl_attachment=1';
+            // Get the clean title for filename
+            const cleanTitle = resource.title ? resource.title.replace(/[^a-zA-Z0-9]/g, '_') : 'document';
+            const ext = resource.file_url.split('.').pop().toLowerCase();
             
-            linkHtml = `
-                <a href="${downloadUrl}" target="_blank" class="download-btn" style="background: ${fileColor}; color: white;" onclick="window.bmsBank.markDownloaded('${resource.id}')">
-                    <i class="fas ${fileIcon}"></i>
-                    ${downloadText}
-                    <i class="fas fa-arrow-down" style="font-size:0.7rem;"></i>
-                </a>
-            `;
+            // Build the download URL with proper flags
+            let downloadUrl = resource.file_url;
+            
+            // Add fl_attachment if not present
+            if (!downloadUrl.includes('fl_attachment')) {
+                downloadUrl = downloadUrl.includes('?') 
+                    ? downloadUrl + '&fl_attachment=1' 
+                    : downloadUrl + '?fl_attachment=1';
+            }
+            
+            // For PDFs, add filename parameter for proper download naming
+            if (ext === 'pdf') {
+                downloadUrl = downloadUrl + '&filename=' + encodeURIComponent(cleanTitle + '.pdf');
+            }
+            
+            // For direct download, use onclick with fetch for PDFs, direct for others
+            if (ext === 'pdf') {
+                // PDF: Use fetch to download as blob (forces download)
+                linkHtml = `
+                    <button class="download-btn" style="background: ${fileColor}; color: white;" onclick="window.bmsBank.downloadPDF('${resource.id}', '${resource.file_url}', '${cleanTitle}')">
+                        <i class="fas ${fileIcon}"></i>
+                        ${downloadText}
+                        <i class="fas fa-arrow-down" style="font-size:0.7rem;"></i>
+                    </button>
+                `;
+            } else {
+                // Other files: Direct download with fl_attachment
+                linkHtml = `
+                    <a href="${downloadUrl}" target="_blank" class="download-btn" style="background: ${fileColor}; color: white;" onclick="window.bmsBank.markDownloaded('${resource.id}')">
+                        <i class="fas ${fileIcon}"></i>
+                        ${downloadText}
+                        <i class="fas fa-arrow-down" style="font-size:0.7rem;"></i>
+                    </a>
+                `;
+            }
         } else if (resource.google_drive_link) {
             linkHtml = `
                 <a href="${resource.google_drive_link}" target="_blank" class="download-btn" style="background: #4285f4; color: white;">
@@ -305,6 +359,7 @@ class BMSBank {
                     ${resource.lecturer_name ? `
                         <div class="resource-card-meta">
                             <span><i class="fas fa-user-tie"></i> ${this.escapeHtml(resource.lecturer_name)}</span>
+                            ${weekDate ? `<span><i class="fas fa-calendar-alt"></i> ${weekDate}</span>` : ''}
                             ${resource.day_of_week ? `<span><i class="fas fa-calendar-day"></i> ${resource.day_of_week}</span>` : ''}
                         </div>
                     ` : ''}
@@ -320,6 +375,48 @@ class BMSBank {
                 </div>
             </div>
         `;
+    }
+
+    // ============================================
+    // PDF DOWNLOAD - FIXED
+    // ============================================
+    downloadPDF(resourceId, fileUrl, title) {
+        // Show loading toast
+        this.showToast('📄 Downloading PDF...', 'info');
+        
+        // Use fetch to get the PDF as a blob
+        fetch(fileUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create a download link
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.download = title ? title + '.pdf' : 'document.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                // Mark as downloaded
+                this.markDownloaded(resourceId);
+                this.showToast('✅ PDF downloaded successfully!', 'success');
+            })
+            .catch(error => {
+                console.error('PDF download failed:', error);
+                // Fallback: Try with fl_attachment
+                const fallbackUrl = fileUrl.includes('?') 
+                    ? fileUrl + '&fl_attachment=1&filename=' + encodeURIComponent((title || 'document') + '.pdf')
+                    : fileUrl + '?fl_attachment=1&filename=' + encodeURIComponent((title || 'document') + '.pdf');
+                window.open(fallbackUrl, '_blank');
+                this.markDownloaded(resourceId);
+                this.showToast('⚠️ PDF opening in new tab', 'info');
+            });
     }
 
     // ============================================
@@ -400,7 +497,18 @@ class BMSBank {
         this.page = 1;
         this.isFirstLoad = true;
         this.loadResources();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Scroll to resources section
+        const resourcesContainer = document.getElementById('resourcesContainer');
+        if (resourcesContainer) {
+            const headerOffset = 80;
+            const elementPosition = resourcesContainer.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
     }
 
     // ============================================
@@ -423,11 +531,19 @@ class BMSBank {
         
         downloadable.forEach((r, index) => {
             setTimeout(() => {
-                const downloadUrl = r.file_url.includes('?') 
-                    ? r.file_url + '&fl_attachment=1' 
-                    : r.file_url + '?fl_attachment=1';
-                window.open(downloadUrl, '_blank');
-                this.markDownloaded(r.id);
+                const ext = r.file_url.split('.').pop().toLowerCase();
+                if (ext === 'pdf') {
+                    // PDF: Use downloadPDF method
+                    const cleanTitle = r.title ? r.title.replace(/[^a-zA-Z0-9]/g, '_') : 'document';
+                    this.downloadPDF(r.id, r.file_url, cleanTitle);
+                } else {
+                    // Other files: Direct download
+                    const downloadUrl = r.file_url.includes('?') 
+                        ? r.file_url + '&fl_attachment=1' 
+                        : r.file_url + '?fl_attachment=1';
+                    window.open(downloadUrl, '_blank');
+                    this.markDownloaded(r.id);
+                }
             }, index * 500);
         });
         
@@ -444,17 +560,22 @@ class BMSBank {
     }
 
     // ============================================
-    // EVENT LISTENERS
+    // EVENT LISTENERS - FIXED SEARCH
     // ============================================
     setupEventListeners() {
         let searchTimeout;
         const searchInput = document.getElementById('searchInput');
         const heroSearch = document.getElementById('heroSearch');
         
-        const handleSearch = (value) => {
+        // Proper search handler
+        const performSearch = (value) => {
             clearTimeout(searchTimeout);
             const val = value.trim();
-            document.getElementById('searchClear').style.display = val ? 'flex' : 'none';
+            // Update clear button visibility
+            const clearBtn = document.getElementById('searchClear');
+            if (clearBtn) {
+                clearBtn.style.display = val ? 'flex' : 'none';
+            }
             searchTimeout = setTimeout(() => {
                 this.currentSearch = val;
                 this.page = 1;
@@ -463,27 +584,92 @@ class BMSBank {
             }, 400);
         };
 
+        // Main search input
         if (searchInput) {
-            searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
-        }
+            searchInput.addEventListener('input', (e) => {
+                const value = e.target.value;
+                // Sync hero search
+                if (heroSearch && heroSearch !== document.activeElement) {
+                    heroSearch.value = value;
+                }
+                performSearch(value);
+            });
 
-        if (heroSearch) {
-            heroSearch.addEventListener('input', (e) => {
-                handleSearch(e.target.value);
-                if (searchInput) searchInput.value = e.target.value;
+            // Enter key support
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const value = e.target.value.trim();
+                    if (value) {
+                        clearTimeout(searchTimeout);
+                        this.currentSearch = value;
+                        this.page = 1;
+                        this.isFirstLoad = true;
+                        this.loadResources();
+                    }
+                }
             });
         }
 
-        document.getElementById('searchClear').addEventListener('click', () => {
-            if (searchInput) searchInput.value = '';
-            if (heroSearch) heroSearch.value = '';
-            document.getElementById('searchClear').style.display = 'none';
-            this.currentSearch = '';
-            this.page = 1;
-            this.isFirstLoad = true;
-            this.loadResources();
-        });
+        // Hero search input
+        if (heroSearch) {
+            heroSearch.addEventListener('input', (e) => {
+                const value = e.target.value;
+                // Sync main search
+                if (searchInput && searchInput !== document.activeElement) {
+                    searchInput.value = value;
+                }
+                performSearch(value);
+            });
 
+            // Enter key support for hero search
+            heroSearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const value = e.target.value.trim();
+                    if (value) {
+                        clearTimeout(searchTimeout);
+                        this.currentSearch = value;
+                        this.page = 1;
+                        this.isFirstLoad = true;
+                        this.loadResources();
+                    }
+                }
+            });
+        }
+
+        // Hero search button
+        const heroSearchBtn = document.getElementById('heroSearchBtn');
+        if (heroSearchBtn) {
+            heroSearchBtn.addEventListener('click', () => {
+                const value = heroSearch ? heroSearch.value.trim() : '';
+                if (value) {
+                    if (searchInput) searchInput.value = value;
+                    this.currentSearch = value;
+                    this.page = 1;
+                    this.isFirstLoad = true;
+                    this.loadResources();
+                } else {
+                    this.showToast('Please enter a search term', 'info');
+                }
+            });
+        }
+
+        // Search clear button
+        const clearBtn = document.getElementById('searchClear');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                if (searchInput) searchInput.value = '';
+                if (heroSearch) heroSearch.value = '';
+                clearBtn.style.display = 'none';
+                this.currentSearch = '';
+                this.page = 1;
+                this.isFirstLoad = true;
+                this.loadResources();
+            });
+        }
+
+        // Category filter
         document.getElementById('categoryFilter').addEventListener('change', (e) => {
             this.currentCategory = e.target.value;
             this.page = 1;
@@ -491,6 +677,7 @@ class BMSBank {
             this.loadResources();
         });
 
+        // Week filter
         document.getElementById('weekFilter').addEventListener('change', (e) => {
             this.currentWeek = e.target.value;
             this.updateWeekButtons();
@@ -499,40 +686,22 @@ class BMSBank {
             this.loadResources();
         });
 
+        // Sort filter
         document.getElementById('sortFilter').addEventListener('change', (e) => {
             this.currentSort = e.target.value;
             this.renderResources();
         });
 
+        // Load more
         document.getElementById('loadMoreBtn').addEventListener('click', () => {
             this.page++;
             this.loadResources(true);
         });
 
+        // Download all
         const downloadAllBtn = document.getElementById('downloadAllBtn');
         if (downloadAllBtn) {
             downloadAllBtn.addEventListener('click', () => this.downloadAllResources());
-        }
-
-        // Hero search button
-        const heroSearchBtn = document.getElementById('heroSearchBtn');
-        if (heroSearchBtn && heroSearch) {
-            heroSearchBtn.addEventListener('click', () => {
-                const val = heroSearch.value.trim();
-                if (val) {
-                    if (searchInput) searchInput.value = val;
-                    this.currentSearch = val;
-                    this.page = 1;
-                    this.isFirstLoad = true;
-                    this.loadResources();
-                }
-            });
-            heroSearch.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    heroSearchBtn.click();
-                }
-            });
         }
 
         // ============================================
@@ -583,7 +752,7 @@ class BMSBank {
     }
 
     // ============================================
-    // WEEK NAVIGATION
+    // WEEK NAVIGATION - FIXED SCROLL
     // ============================================
     setupWeekNavigation() {
         const nav = document.getElementById('weekNav');
@@ -601,7 +770,18 @@ class BMSBank {
                 this.page = 1;
                 this.isFirstLoad = true;
                 this.loadResources();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Scroll to resources section
+                const resourcesContainer = document.getElementById('resourcesContainer');
+                if (resourcesContainer) {
+                    const headerOffset = 80;
+                    const elementPosition = resourcesContainer.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
             });
             nav.appendChild(btn);
         }
