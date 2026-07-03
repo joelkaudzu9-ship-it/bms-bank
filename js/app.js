@@ -6,13 +6,14 @@ class BMSBank {
         this.currentWeek = 'all';
         this.currentCategory = 'all';
         this.currentSearch = '';
-        this.currentSort = 'newest';
+        this.currentSort = 'oldest'; // CHANGED: Default to oldest first
         this.page = 1;
         this.hasMore = true;
         this.loading = false;
         this.totalResources = 0;
         this.isFirstLoad = true;
         this.showTracker = false;
+        this.filterTimeout = null; // For debouncing filter loading
         
         // Point to the PDF file in assets folder
         this.trackerPDFUrl = 'assets/Accountability Tracker.pdf';
@@ -54,10 +55,10 @@ class BMSBank {
         await this.loadCategories();
         await this.loadResources();
         
-        // Set default sort dropdown
+        // Set default sort dropdown to "oldest"
         const sortFilter = document.getElementById('sortFilter');
         if (sortFilter) {
-            sortFilter.value = 'newest';
+            sortFilter.value = 'oldest';
         }
         
         this.setupEventListeners();
@@ -72,6 +73,39 @@ class BMSBank {
         this.updateStats();
         this.updateProgressBar();
         this.updateDownloadStats();
+    }
+
+    // ============================================
+    // LOADING OVERLAY FOR FILTERS
+    // ============================================
+    showFilterLoading() {
+        // Show loading overlay on resources container
+        const container = document.getElementById('resourcesContainer');
+        if (!container) return;
+        
+        // Don't show if already showing
+        if (container.querySelector('.filter-loading-overlay')) return;
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'filter-loading-overlay';
+        overlay.innerHTML = `
+            <div class="filter-loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading resources...</p>
+            </div>
+        `;
+        container.style.position = 'relative';
+        container.appendChild(overlay);
+    }
+
+    hideFilterLoading() {
+        const overlay = document.querySelector('.filter-loading-overlay');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.remove();
+            }, 300);
+        }
     }
 
     // ============================================
@@ -535,11 +569,16 @@ class BMSBank {
     }
 
     // ============================================
-    // RESOURCES
+    // RESOURCES - WITH LOADING STATES
     // ============================================
     async loadResources(append = false) {
         if (this.loading) return;
         this.loading = true;
+
+        // Show loading overlay for filters (not on first load)
+        if (!this.isFirstLoad) {
+            this.showFilterLoading();
+        }
 
         if (this.isFirstLoad) {
             const skeleton = document.getElementById('skeletonGrid');
@@ -583,6 +622,9 @@ class BMSBank {
             const skeleton = document.getElementById('skeletonGrid');
             if (skeleton) skeleton.style.display = 'none';
             
+            // Hide loading overlay
+            this.hideFilterLoading();
+            
             if (this.showTracker) {
                 this.renderStudyTracker();
             } else {
@@ -600,6 +642,7 @@ class BMSBank {
             console.error('Error loading resources:', error);
             const skeleton = document.getElementById('skeletonGrid');
             if (skeleton) skeleton.style.display = 'none';
+            this.hideFilterLoading();
             this.showError('Failed to load resources. Please refresh and try again.');
         } finally {
             this.loading = false;
@@ -643,7 +686,7 @@ class BMSBank {
                 sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
                 break;
             default:
-                sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         }
 
         const cards = sorted.map((resource, index) => this.createResourceCard(resource, index)).join('');
@@ -985,7 +1028,7 @@ class BMSBank {
     }
 
     // ============================================
-    // EVENT LISTENERS
+    // EVENT LISTENERS - With Loading States
     // ============================================
     setupEventListeners() {
         let searchTimeout;
@@ -1103,18 +1146,26 @@ class BMSBank {
             });
         }
 
+        // Category Filter - With Loading State
         const categoryFilter = document.getElementById('categoryFilter');
         if (categoryFilter) {
             categoryFilter.addEventListener('change', (e) => {
                 this.currentCategory = e.target.value;
                 this.page = 1;
                 this.isFirstLoad = true;
-                this.loadResources();
-                this.scrollToResources();
+                // Show loading overlay
+                this.showFilterLoading();
+                // Use timeout to allow UI to update
+                clearTimeout(this.filterTimeout);
+                this.filterTimeout = setTimeout(() => {
+                    this.loadResources();
+                    this.scrollToResources();
+                }, 200);
                 console.log('📂 Category filter:', this.currentCategory);
             });
         }
 
+        // Week Filter - With Loading State
         const weekFilter = document.getElementById('weekFilter');
         if (weekFilter) {
             weekFilter.addEventListener('change', (e) => {
@@ -1122,12 +1173,18 @@ class BMSBank {
                 this.updateWeekButtons();
                 this.page = 1;
                 this.isFirstLoad = true;
-                this.loadResources();
-                this.scrollToResources();
+                // Show loading overlay
+                this.showFilterLoading();
+                clearTimeout(this.filterTimeout);
+                this.filterTimeout = setTimeout(() => {
+                    this.loadResources();
+                    this.scrollToResources();
+                }, 200);
                 console.log('📅 Week filter:', this.currentWeek);
             });
         }
 
+        // Sort Filter - No loading needed, just re-render
         const sortFilter = document.getElementById('sortFilter');
         if (sortFilter) {
             sortFilter.addEventListener('change', (e) => {
@@ -1224,8 +1281,12 @@ class BMSBank {
                     toggleBtn.title = 'Study Tracker';
                 }
                 
-                this.loadResources();
-                this.scrollToResources();
+                // Show loading overlay
+                this.showFilterLoading();
+                setTimeout(() => {
+                    this.loadResources();
+                    this.scrollToResources();
+                }, 200);
                 console.log('📅 Week nav clicked:', week);
             });
             nav.appendChild(btn);
@@ -1248,8 +1309,12 @@ class BMSBank {
                     toggleBtn.title = 'Study Tracker';
                 }
                 
-                this.loadResources();
-                this.scrollToResources();
+                // Show loading overlay
+                this.showFilterLoading();
+                setTimeout(() => {
+                    this.loadResources();
+                    this.scrollToResources();
+                }, 200);
                 console.log('📅 All Weeks clicked');
             });
         }
