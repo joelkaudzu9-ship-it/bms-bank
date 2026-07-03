@@ -1,4 +1,4 @@
-// Main Application - BMS BANK Premium
+// Main Application - BMS BANK Premium with Study Tracker
 class BMSBank {
     constructor() {
         this.resources = [];
@@ -12,6 +12,7 @@ class BMSBank {
         this.loading = false;
         this.totalResources = 0;
         this.isFirstLoad = true;
+        this.showTracker = false;
         
         // Week date mapping
         this.WEEK_DATES = {
@@ -36,6 +37,9 @@ class BMSBank {
             19: "19-23 October 2026",
         };
         
+        // Load timetable data from global variable
+        this.TIMETABLE = typeof TIMETABLE_DATA !== 'undefined' ? TIMETABLE_DATA : {};
+        
         this.init();
     }
 
@@ -56,11 +60,286 @@ class BMSBank {
         this.setupKeyboardShortcuts();
         this.setupQuickAccess();
         this.setupHeroParticles();
+        this.setupTrackerToggle();
         this.hideLoadingScreen();
         this.updateStats();
         this.updateProgressBar();
     }
 
+    // ============================================
+    // TRACKER TOGGLE
+    // ============================================
+    setupTrackerToggle() {
+        const toggleBtn = document.getElementById('trackerToggle');
+        if (!toggleBtn) return;
+        
+        toggleBtn.addEventListener('click', () => {
+            this.toggleStudyTracker();
+        });
+    }
+
+    toggleStudyTracker() {
+        this.showTracker = !this.showTracker;
+        const toggleBtn = document.getElementById('trackerToggle');
+        if (toggleBtn) {
+            toggleBtn.classList.toggle('active', this.showTracker);
+            toggleBtn.innerHTML = this.showTracker 
+                ? '<i class="fas fa-th-list"></i>' 
+                : '<i class="fas fa-check-double"></i>';
+            toggleBtn.title = this.showTracker ? 'View Resources' : 'Study Tracker';
+        }
+        
+        if (this.showTracker) {
+            this.renderStudyTracker();
+        } else {
+            // Re-render resources with current filters
+            this.renderResources();
+        }
+    }
+
+    // ============================================
+    // STUDY TRACKER
+    // ============================================
+    renderStudyTracker() {
+        const container = document.getElementById('resourcesContainer');
+        let week = this.currentWeek === 'all' ? 1 : parseInt(this.currentWeek);
+        
+        // If "all" is selected, find first week with data
+        if (this.currentWeek === 'all') {
+            const weeks = Object.keys(this.TIMETABLE);
+            if (weeks.length > 0) {
+                week = parseInt(weeks[0]);
+            }
+        }
+        
+        const weekData = this.TIMETABLE[week];
+        
+        if (!weekData || !weekData.days) {
+            container.innerHTML = `
+                <div class="empty-state" style="text-align:center;padding:4rem 1rem;">
+                    <div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 style="font-size:1.2rem;margin-bottom:0.25rem;color:var(--text);">No timetable data for Week ${week}</h3>
+                    <p style="color:var(--text-muted);margin-bottom:1rem;">The timetable data is being loaded. Please check back later.</p>
+                    <button class="btn-premium" onclick="window.bmsBank.toggleStudyTracker()">
+                        <i class="fas fa-arrow-left"></i> Back to Resources
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        const weekDate = this.WEEK_DATES[week] || '';
+        const days = Object.keys(weekData.days).filter(day => 
+            weekData.days[day] && weekData.days[day].length > 0
+        );
+        
+        let html = `
+            <div class="tracker-header">
+                <div class="tracker-header-left">
+                    <h2><i class="fas fa-check-double" style="color: var(--secondary);"></i> Week ${week} Study Tracker</h2>
+                    <span class="week-date">${weekDate}</span>
+                </div>
+                <div class="tracker-header-actions">
+                    <button class="btn-premium" onclick="window.bmsBank.printTracker()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                    <button class="btn-premium-outline" onclick="window.bmsBank.resetTracker(${week})">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </div>
+            <div class="tracker-progress glass">
+                <div class="tracker-progress-bar">
+                    <div class="tracker-progress-fill" id="trackerProgressFill" style="width: 0%;"></div>
+                </div>
+                <span class="tracker-progress-text" id="trackerProgressText">0% Complete</span>
+            </div>
+            <div class="tracker-grid">
+        `;
+
+        days.forEach(day => {
+            const activities = weekData.days[day].filter(a => 
+                a.activity && !a.activity.includes('NO') && !a.activity.includes('PUBLIC HOLIDAY')
+            );
+            if (activities.length === 0) return;
+            
+            html += `
+                <div class="tracker-day glass">
+                    <div class="tracker-day-header">
+                        <h3><i class="fas fa-calendar-day"></i> ${day}</h3>
+                        <span class="tracker-day-count" id="trackerDayCount_${week}_${day}">0/${activities.length}</span>
+                    </div>
+                    <div class="tracker-activities">
+            `;
+            
+            activities.forEach((activity, idx) => {
+                const id = `tracker_${week}_${day}_${idx}`;
+                const studied = localStorage.getItem(id + '_studied') === 'true';
+                const revised = localStorage.getItem(id + '_revised') === 'true';
+                
+                let statusClass = '';
+                if (studied && revised) statusClass = 'complete';
+                else if (studied) statusClass = 'studied';
+                
+                const isExam = activity.activity.includes('EXAM') || activity.activity.includes('BREAK');
+                const isStudyWeek = activity.activity.includes('WEEK OF PEACE') || activity.activity.includes('STUDY WEEK');
+                const isRevision = activity.activity.includes('REVISION') || activity.activity.includes('MAKE-UP');
+                
+                let activityClass = '';
+                if (isExam) activityClass = 'exam';
+                else if (isStudyWeek) activityClass = 'study-week';
+                else if (isRevision) activityClass = 'revision';
+                
+                // Skip rendering if no time and no activity (empty slots)
+                if (!activity.activity || activity.activity.trim() === '') return;
+                
+                html += `
+                    <div class="tracker-activity ${statusClass} ${activityClass}" data-id="${id}">
+                        <div class="tracker-activity-info">
+                            ${activity.time && activity.time !== '00:00' ? `<span class="tracker-time">${activity.time}</span>` : ''}
+                            <span class="tracker-activity-name">${this.escapeHtml(activity.activity)}</span>
+                            ${activity.lecturer ? `<span class="tracker-lecturer"><i class="fas fa-user-tie"></i> ${this.escapeHtml(activity.lecturer)}</span>` : ''}
+                        </div>
+                        ${!isExam && !isStudyWeek && !isRevision ? `
+                            <div class="tracker-activity-actions">
+                                <button class="tracker-btn studied ${studied ? 'active' : ''}" onclick="window.bmsBank.toggleTrackerStatus('${id}', 'studied')" title="Mark as Studied">
+                                    <i class="fas fa-book"></i>
+                                </button>
+                                <button class="tracker-btn revised ${revised ? 'active' : ''}" onclick="window.bmsBank.toggleTrackerStatus('${id}', 'revised')" title="Mark as Revised">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="tracker-activity-actions">
+                                <span class="tracker-status-label">${isExam ? '📝 Exam' : isStudyWeek ? '📚 Study Week' : '📖 Revision'}</span>
+                            </div>
+                        `}
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+            </div>
+            <div class="tracker-legend glass">
+                <span><span class="legend-dot studied"></span> Studied</span>
+                <span><span class="legend-dot revised"></span> Revised</span>
+                <span><span class="legend-dot complete"></span> Complete</span>
+                <span><span class="legend-dot incomplete"></span> Not Started</span>
+            </div>
+        `;
+
+        container.innerHTML = html;
+        this.updateTrackerStats(week);
+    }
+
+    toggleTrackerStatus(id, type) {
+        const key = id + '_' + type;
+        const current = localStorage.getItem(key) === 'true';
+        localStorage.setItem(key, String(!current));
+        
+        // Update UI
+        const activity = document.querySelector(`.tracker-activity[data-id="${id}"]`);
+        if (activity) {
+            const btn = activity.querySelector(`.tracker-btn.${type}`);
+            if (btn) {
+                btn.classList.toggle('active');
+            }
+            // Update status class
+            const studied = localStorage.getItem(id + '_studied') === 'true';
+            const revised = localStorage.getItem(id + '_revised') === 'true';
+            activity.classList.remove('studied', 'complete');
+            if (studied && revised) activity.classList.add('complete');
+            else if (studied) activity.classList.add('studied');
+        }
+        
+        // Update stats
+        const week = parseInt(id.split('_')[1]);
+        this.updateTrackerStats(week);
+    }
+
+    updateTrackerStats(week) {
+        const weekData = this.TIMETABLE[week];
+        if (!weekData || !weekData.days) return;
+        
+        let total = 0;
+        let studied = 0;
+        let revised = 0;
+        
+        Object.keys(weekData.days).forEach(day => {
+            const activities = weekData.days[day].filter(a => 
+                a.activity && !a.activity.includes('NO') && !a.activity.includes('PUBLIC HOLIDAY')
+            );
+            activities.forEach((activity, idx) => {
+                const id = `tracker_${week}_${day}_${idx}`;
+                total++;
+                if (localStorage.getItem(id + '_studied') === 'true') studied++;
+                if (localStorage.getItem(id + '_revised') === 'true') revised++;
+            });
+        });
+        
+        // Update day counts
+        Object.keys(weekData.days).forEach(day => {
+            const activities = weekData.days[day].filter(a => 
+                a.activity && !a.activity.includes('NO') && !a.activity.includes('PUBLIC HOLIDAY')
+            );
+            const dayTotal = activities.length;
+            let dayStudied = 0;
+            activities.forEach((activity, idx) => {
+                const id = `tracker_${week}_${day}_${idx}`;
+                if (localStorage.getItem(id + '_studied') === 'true') dayStudied++;
+            });
+            const dayCount = document.getElementById(`trackerDayCount_${week}_${day}`);
+            if (dayCount) {
+                dayCount.textContent = `${dayStudied}/${dayTotal}`;
+            }
+        });
+        
+        // Update progress
+        const progressFill = document.getElementById('trackerProgressFill');
+        const progressText = document.getElementById('trackerProgressText');
+        if (progressFill && progressText) {
+            const pct = total > 0 ? Math.round((studied / total) * 100) : 0;
+            progressFill.style.width = pct + '%';
+            progressText.textContent = `${pct}% Complete (${studied}/${total} studied, ${revised} revised)`;
+        }
+    }
+
+    resetTracker(week) {
+        if (!confirm(`Reset all progress for Week ${week}?`)) return;
+        
+        const weekData = this.TIMETABLE[week];
+        if (!weekData || !weekData.days) return;
+        
+        Object.keys(weekData.days).forEach(day => {
+            const activities = weekData.days[day].filter(a => 
+                a.activity && !a.activity.includes('NO') && !a.activity.includes('PUBLIC HOLIDAY')
+            );
+            activities.forEach((activity, idx) => {
+                const id = `tracker_${week}_${day}_${idx}`;
+                localStorage.removeItem(id + '_studied');
+                localStorage.removeItem(id + '_revised');
+            });
+        });
+        
+        this.renderStudyTracker();
+        this.showToast('✅ Progress reset for Week ' + week, 'success');
+    }
+
+    printTracker() {
+        window.print();
+    }
+
+    // ============================================
+    // LOADING SCREEN
+    // ============================================
     showLoadingScreen() {
         const screen = document.getElementById('loadingScreen');
         screen.classList.remove('hidden');
@@ -102,6 +381,9 @@ class BMSBank {
         }
     }
 
+    // ============================================
+    // CATEGORIES
+    // ============================================
     async loadCategories() {
         try {
             const response = await fetch(`${CONFIG.API_URL}/categories`);
@@ -123,6 +405,9 @@ class BMSBank {
         }
     }
 
+    // ============================================
+    // RESOURCES
+    // ============================================
     async loadResources(append = false) {
         if (this.loading) return;
         this.loading = true;
@@ -170,7 +455,13 @@ class BMSBank {
             const skeleton = document.getElementById('skeletonGrid');
             if (skeleton) skeleton.style.display = 'none';
             
-            this.renderResources();
+            // If tracker is active, render tracker instead of resources
+            if (this.showTracker) {
+                this.renderStudyTracker();
+            } else {
+                this.renderResources();
+            }
+            
             this.updateStats();
             this.updateProgressBar();
             
@@ -427,7 +718,7 @@ class BMSBank {
     }
 
     // ============================================
-    // PROGRESS TRACKER
+    // PROGRESS TRACKER (Download Progress)
     // ============================================
     getProgress() {
         const total = this.totalResources || 1;
@@ -503,6 +794,16 @@ class BMSBank {
         this.updateWeekButtons();
         this.page = 1;
         this.isFirstLoad = true;
+        this.showTracker = false;
+        
+        // Reset tracker toggle
+        const toggleBtn = document.getElementById('trackerToggle');
+        if (toggleBtn) {
+            toggleBtn.classList.remove('active');
+            toggleBtn.innerHTML = '<i class="fas fa-check-double"></i>';
+            toggleBtn.title = 'Study Tracker';
+        }
+        
         this.loadResources();
         
         const resourcesContainer = document.getElementById('resourcesContainer');
@@ -786,6 +1087,16 @@ class BMSBank {
                 this.updateWeekButtons();
                 this.page = 1;
                 this.isFirstLoad = true;
+                this.showTracker = false;
+                
+                // Reset tracker toggle
+                const toggleBtn = document.getElementById('trackerToggle');
+                if (toggleBtn) {
+                    toggleBtn.classList.remove('active');
+                    toggleBtn.innerHTML = '<i class="fas fa-check-double"></i>';
+                    toggleBtn.title = 'Study Tracker';
+                }
+                
                 this.loadResources();
                 console.log('📅 Week nav clicked:', week);
                 
@@ -813,7 +1124,7 @@ class BMSBank {
     }
 
     // ============================================
-    // THEME TOGGLE - FIXED
+    // THEME TOGGLE
     // ============================================
     setupThemeToggle() {
         const toggle = document.getElementById('themeToggle');
@@ -821,20 +1132,16 @@ class BMSBank {
         
         const icon = toggle.querySelector('i');
         
-        // Check saved theme or system preference
         const savedTheme = localStorage.getItem('bms-theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         
-        // Set initial theme
         let initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', initialTheme);
         
-        // Update icon
         if (icon) {
             icon.className = initialTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
         }
         
-        // Toggle on click
         toggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
